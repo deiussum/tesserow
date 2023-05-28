@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:Deiussum.PatternMaker.WPF"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <local:IntegerToBrushConverter x:Key="IntegerToBrushConverter" />
          
     </Application.Resources>
 </Application>

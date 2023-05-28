@@ -14,8 +14,93 @@
                 <MenuItem Header="_Exit" Click="ExitApp" />
             </MenuItem>
         </Menu>
-        <Grid>
 
-        </Grid>
+        <StackPanel>
+            <ItemsControl Name="TopRow">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Black" Width="{Binding Item1}" Height="30" BorderThickness="2" Margin="2">
+                            <TextBlock Text="{Binding Item2}" />
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl Name="MosaicChartItems">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Border
+                                BorderBrush="Black"
+                                Background="{Binding Color, Converter={StaticResource IntegerToBrushConverter}}" 
+                                BorderThickness="2" 
+                                Width="50" 
+                                Height="30">
+                                <TextBlock Width="40" Margin="1">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Row {0}">
+                                            <Binding Path="RowNumber" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Border>
+                            <ItemsControl ItemsSource="{Binding Items}" >
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Click="MosaicSquareClicked">
+                                            <Border Name="MosaicChartRectangle" 
+                                                BorderBrush="Black" 
+                                                Background="{Binding Color, Converter={StaticResource IntegerToBrushConverter}}" 
+                                                BorderThickness="2" 
+                                                Width="30" 
+                                                Height="30">
+                                                <TextBlock Text="{Binding StitchTypeDisplay}"/>
+                                            </Border>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Border
+                                BorderBrush="Black"
+                                Background="{Binding Color, Converter={StaticResource IntegerToBrushConverter}}" 
+                                BorderThickness="2" 
+                                Width="50" 
+                                Height="30">
+                                <TextBlock Width="40" Margin="1">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Row {0}">
+                                            <Binding Path="RowNumber" />
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl Name="BottomRow">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Black" Width="{Binding Item1}" Height="30" BorderThickness="2" Margin="2">
+                            <TextBlock Text="{Binding Item2}" />
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
     </DockPanel>
 </Window>

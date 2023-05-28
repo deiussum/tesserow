@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deiussum.PatternMaker.WPF", "Deiussum.PatternMaker.WPF\Deiussum.PatternMaker.WPF.csproj", "{4DAF00FA-048A-4175-87A1-EC7AC9385F46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deiussum.PatternMaker.Lib", "Deiussum.PatternMaker.Lib\Deiussum.PatternMaker.Lib.csproj", "{D9D54001-4BBB-475C-905A-572AAF1580EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{4DAF00FA-048A-4175-87A1-EC7AC9385F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DAF00FA-048A-4175-87A1-EC7AC9385F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DAF00FA-048A-4175-87A1-EC7AC9385F46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9D54001-4BBB-475C-905A-572AAF1580EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9D54001-4BBB-475C-905A-572AAF1580EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9D54001-4BBB-475C-905A-572AAF1580EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9D54001-4BBB-475C-905A-572AAF1580EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
