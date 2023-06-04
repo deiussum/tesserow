@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Drawing;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Deiussum.PatternMaker.Lib.Mosaic;
+using Microsoft.Win32;
 
 namespace Deiussum.PatternMaker.WPF;
 
@@ -22,20 +24,40 @@ public partial class MainWindow : Window {
         InitializeComponent();
 
         MosaicChart = new Chart(10, 10);
-        MosaicChartItems.ItemsSource = MosaicChart.Rows;
-        List<Tuple<int, string>> rowData = new List<Tuple<int, string>>();
-
-        rowData.Add(new Tuple<int, string>(46, string.Empty));
-        var columnList = Enumerable.Range(1, MosaicChart.ColumnCount).Reverse().ToList();
-        rowData.AddRange(columnList.Select(x => new Tuple<int, string>(30, x.ToString())));
-        rowData.Add(new Tuple<int, string>(46, string.Empty));
-
-        TopRow.ItemsSource = rowData;
-        BottomRow.ItemsSource = rowData;
+        BindNewMosaic();
     }
 
     private void ExitApp(object sender, RoutedEventArgs ea) {
         Application.Current.Shutdown();
+    }
+
+    private void ImportImage(object sender, RoutedEventArgs ea) {
+        var dialog = new OpenFileDialog();
+        var result = dialog.ShowDialog();
+
+        if (result != true) return;
+        
+        var image = new Bitmap(System.Drawing.Image.FromFile(dialog.FileName));
+
+        MosaicChart = new Chart(image.Width, image.Height);
+
+        for(var rowIndex = image.Height; rowIndex > 0; rowIndex--) {
+            for(var colIndex = image.Width; colIndex > 0; colIndex--) {
+                var pixel = image.GetPixel(colIndex - 1, rowIndex - 1);
+
+                var convertedRow = image.Height - rowIndex;
+                var convertedColumn = image.Width - colIndex;
+                var color = IsWhite(pixel) ? 1 : 0;
+
+                MosaicChart.SetColor(convertedColumn, convertedRow, color);
+            }
+        }
+        BindNewMosaic();
+    }
+
+    private bool IsWhite(System.Drawing.Color color) {
+        return color.A < 50 ||
+            (color.R > 240 && color.G > 240 && color.B > 240);
     }
 
     private void MosaicSquareClicked(object sender, RoutedEventArgs ea) {
@@ -51,5 +73,19 @@ public partial class MainWindow : Window {
         chartSquare.ToggleColor();
 
         MosaicChartItems.Items.Refresh();
+    }
+
+    private void BindNewMosaic() {
+        MosaicChartItems.ItemsSource = MosaicChart.Rows;
+        var rowData = new List<Tuple<int, string>>();
+
+        rowData.Add(new Tuple<int, string>(46, string.Empty));
+
+        var columnList = Enumerable.Range(1, MosaicChart.ColumnCount).Reverse().ToList();
+        rowData.AddRange(columnList.Select(x => new Tuple<int, string>(30, x.ToString())));
+        rowData.Add(new Tuple<int, string>(46, string.Empty));
+
+        TopRow.ItemsSource = rowData;
+        BottomRow.ItemsSource = rowData;
     }
 }

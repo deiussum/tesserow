@@ -4,6 +4,10 @@
     <ProjectReference Include="..\Deiussum.PatternMaker.Lib\Deiussum.PatternMaker.Lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>

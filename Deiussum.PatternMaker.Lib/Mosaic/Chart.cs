@@ -41,6 +41,20 @@ public class Chart
 
         return rowBelow.Items.FirstOrDefault(x => x.ColumnNumber == item.ColumnNumber);
     }
+
+    public void ToggleSquare(int x, int y) {
+        var row = Rows.FirstOrDefault(row => row.RowNumber == y);
+        var square = row?.Items.FirstOrDefault(cell => cell.ColumnNumber == x);
+
+        square?.ToggleColor();
+    }
+
+    public void SetColor(int x, int y, int color) {
+        var row = Rows.FirstOrDefault(row => row.RowNumber == y);
+        var square = row?.Items.FirstOrDefault(cell => cell.ColumnNumber == x);
+
+        if (square?.Color != color) square?.ToggleColor();
+    }
 }
 
 
