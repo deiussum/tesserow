@@ -55,6 +55,10 @@ public class Chart
 
         if (square?.Color != color) square?.ToggleColor();
     }
+
+    public string GetWrittenPattern() {
+        return string.Join("\r\n", Rows.OrderBy(x => x.RowNumber).Select(x => x.GetWrittenPattern()));
+    }
 }
 
 

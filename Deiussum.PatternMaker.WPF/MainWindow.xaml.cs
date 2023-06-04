@@ -88,4 +88,11 @@ public partial class MainWindow : Window {
         TopRow.ItemsSource = rowData;
         BottomRow.ItemsSource = rowData;
     }
+
+    private void ShowWrittenPattern(object sender, RoutedEventArgs ea) {
+        var writtenPattern = MosaicChart.GetWrittenPattern();
+        var dialog = new WrittenPatternDialog(writtenPattern);
+
+        dialog.ShowDialog();
+    }
 }

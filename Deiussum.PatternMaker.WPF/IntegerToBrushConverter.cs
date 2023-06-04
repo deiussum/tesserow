@@ -11,7 +11,7 @@ public class IntegerToBrushConverter : IValueConverter
         var colorNumber = value as int?;
         if (!colorNumber.HasValue) return Brushes.White;
 
-        return colorNumber == 0 ? Brushes.Aqua : Brushes.White;
+        return colorNumber == 0 ? Brushes.White : Brushes.Aqua;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -19,6 +19,6 @@ public class IntegerToBrushConverter : IValueConverter
         var brush = value as Brush;
         if (brush == null) return 0;
 
-        return brush == Brushes.White ? 1 : 0;
+        return brush == Brushes.White ? 0 : 1;
     }
 }
