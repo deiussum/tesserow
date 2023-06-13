@@ -10,7 +10,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Deiussum.PatternMaker.Lib.Mosaic;
+using Deiussum.PatternMaker.WPF.Pdf;
 using Microsoft.Win32;
+using QuestPDF.Fluent;
 
 namespace Deiussum.PatternMaker.WPF;
 
@@ -94,5 +96,16 @@ public partial class MainWindow : Window {
         var dialog = new WrittenPatternDialog(writtenPattern);
 
         dialog.ShowDialog();
+    }
+
+    private void ExportPdf(object sender, RoutedEventArgs ea) {
+        var dialog = new SaveFileDialog();
+        dialog.DefaultExt = "pdf";
+
+        if (dialog.ShowDialog() != true) return;
+
+        var model = new ChartPageModel(MosaicChart);
+        var doc = new ChartDocument(model);
+        doc.GeneratePdf(dialog.FileName);
     }
 }

@@ -9,6 +9,7 @@ public class ChartRowItem {
     public string StitchTypeDisplay => StitchType == 0 ? string.Empty : "X";
     public string StitchTypeWrittenDisplay => StitchType == 0 ? "SC" : "DC";
     public bool IsRowColor => Color == Row.Color;
+    public int RowNumber => Row.RowNumber; 
 
     public ChartRowItem(ChartRow row, int columnNumber) {
         Row = row;

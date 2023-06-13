@@ -2,9 +2,11 @@
 
 public class Chart
 {
-    public int RowCount { get; private set; }
-    public int ColumnCount { get; private set; }
-    public List<ChartRow> Rows { get; private set; }
+    public int RowCount { get; protected set; }
+    public int ColumnCount { get; protected set; }
+    public List<ChartRow> Rows { get; protected set; }
+
+    public List<ChartRowItem> AllItems => Rows.SelectMany(x => x.Items).ToList();
 
     public Chart()
     {
@@ -56,7 +58,7 @@ public class Chart
         if (square?.Color != color) square?.ToggleColor();
     }
 
-    public string GetWrittenPattern() {
+    public virtual string GetWrittenPattern() {
         return string.Join("\r\n", Rows.OrderBy(x => x.RowNumber).Select(x => x.GetWrittenPattern()));
     }
 }

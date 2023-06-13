@@ -8,6 +8,8 @@ public class ChartRow {
     public Chart Chart { get; private set;}
     public List<ChartRowItem> Items { get; private set; }
 
+    public string ColorLabel => Color == 0 ? "A" : "B";
+
     public ChartRow(Chart chart, int rowNumber) {
         Chart = chart;
         Items = new List<ChartRowItem>();
@@ -24,7 +26,7 @@ public class ChartRow {
     public string GetWrittenPattern() {
         var stringBuilder = new StringBuilder();
 
-        stringBuilder.AppendLine($"Row {RowNumber}, Color {Color + 1}");
+        stringBuilder.AppendLine($"Row {RowNumber}, Color {ColorLabel}");
         stringBuilder.Append("    ");
 
         var currentStitch = string.Empty;
