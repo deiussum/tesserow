@@ -41,15 +41,15 @@ public partial class MainWindow : Window {
         
         var image = new Bitmap(System.Drawing.Image.FromFile(dialog.FileName));
 
-        MosaicChart = new Chart(image.Width, image.Height);
+        MosaicChart = new Chart(image.Height, image.Width);
 
         for(var rowIndex = image.Height; rowIndex > 0; rowIndex--) {
             for(var colIndex = image.Width; colIndex > 0; colIndex--) {
                 var pixel = image.GetPixel(colIndex - 1, rowIndex - 1);
 
-                var convertedRow = image.Height - rowIndex;
-                var convertedColumn = image.Width - colIndex;
-                var color = IsWhite(pixel) ? 1 : 0;
+                var convertedRow = image.Height - rowIndex + 1;
+                var convertedColumn = image.Width - colIndex + 1;
+                var color = IsWhite(pixel) ? 0 : 1;
 
                 MosaicChart.SetColor(convertedColumn, convertedRow, color);
             }
