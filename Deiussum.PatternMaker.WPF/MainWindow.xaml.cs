@@ -107,5 +107,7 @@ public partial class MainWindow : Window {
         var model = new ChartPageModel(MosaicChart);
         var doc = new ChartDocument(model);
         doc.GeneratePdf(dialog.FileName);
+
+        MessageBox.Show("PDF exported!");
     }
 }

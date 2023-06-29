@@ -10,13 +10,14 @@ public class ChartPageComponent : IComponent {
     private readonly ChartPageModel _chart;
     private const string colorA = Colors.White;
     private const string colorB = Colors.Grey.Lighten1;
+    private const uint FontSize = 6;
 
     public ChartPageComponent(ChartPageModel chart) {
         _chart = chart;
     }
 
     public void Compose(IContainer container) {
-        var pages = _chart.GetPagedChartItems(15, 35);
+        var pages = _chart.GetPagedChartItems(25, 70);
 
         container.Column(col => {
             foreach(var page in pages) {
@@ -73,7 +74,7 @@ public class ChartPageComponent : IComponent {
                 .Background(cellColor)
                 .Border(1)
                 .AlignCenter()
-                .Element(x => { x.Text(col.StitchTypeDisplay); });
+                .Element(x => { x.Text(col.StitchTypeDisplay).FontSize(FontSize); });
         }
 
         ComposeSideLabels(table, pageRow, colCount + 2, rowColor, row.RowNumber.ToString());
@@ -88,7 +89,7 @@ public class ChartPageComponent : IComponent {
                 .Column((uint)(endCol - col + 2))
                 .Border(1)
                 .AlignCenter()
-                .Element(x => { x.Text(col.ToString()); });
+                .Element(x => { x.Text(col.ToString()).FontSize(FontSize); });
         }
     }
 
@@ -99,6 +100,6 @@ public class ChartPageComponent : IComponent {
             .Background(rowColor)
             .Border(1)
             .AlignCenter()
-            .Element(x => { x.Text(label); });
+            .Element(x => { x.Text(label).FontSize(FontSize); });
     }
 }
