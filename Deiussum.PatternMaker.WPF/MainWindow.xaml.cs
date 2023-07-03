@@ -38,8 +38,19 @@ public partial class MainWindow : Window {
         var result = dialog.ShowDialog();
 
         if (result != true) return;
-        
-        var image = new Bitmap(System.Drawing.Image.FromFile(dialog.FileName));
+
+        SetStatusMessage("Importing image...");
+        BeginImport(dialog.FileName);
+    }
+
+    private void BeginImport(string fileName) {
+        Task.Run(() => {
+            ImportThread(fileName);
+        });
+    }
+
+    private void ImportThread(string fileName) {
+        var image = new Bitmap(System.Drawing.Image.FromFile(fileName));
 
         MosaicChart = new Chart(image.Height, image.Width);
 
@@ -54,7 +65,10 @@ public partial class MainWindow : Window {
                 MosaicChart.SetColor(convertedColumn, convertedRow, color);
             }
         }
-        BindNewMosaic();
+        Dispatcher.BeginInvoke(() => {
+            BindNewMosaic();
+            SetStatusMessage("Import complete");
+        });
     }
 
     private bool IsWhite(System.Drawing.Color color) {
@@ -103,11 +117,25 @@ public partial class MainWindow : Window {
         dialog.DefaultExt = "pdf";
 
         if (dialog.ShowDialog() != true) return;
+        SetStatusMessage("Saving PDF...");
 
-        var model = new ChartPageModel(MosaicChart);
-        var doc = new ChartDocument(model);
-        doc.GeneratePdf(dialog.FileName);
+        Task.Run(() => {
+            var model = new ChartPageModel(MosaicChart);
+            var doc = new ChartDocument(model);
+            doc.GeneratePdf(dialog.FileName);
 
-        MessageBox.Show("PDF exported!");
+            SetStatusMessage("PDF saved");
+        });
+    }
+
+    private void SetStatusMessage(string msg) {
+        if (Dispatcher.CheckAccess()) {
+            StatusMessage.Text = msg;
+        }
+        else {
+            Dispatcher.BeginInvoke(() => {
+                SetStatusMessage(msg);
+            });
+        }
     }
 }

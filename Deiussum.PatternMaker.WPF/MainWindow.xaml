@@ -18,6 +18,11 @@
                 <MenuItem Header="_Exit" Click="ExitApp" />
             </MenuItem>
         </Menu>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Name="StatusMessage" />
+            </StatusBarItem>
+        </StatusBar>
 
         <ScrollViewer HorizontalScrollBarVisibility="Auto">
             <StackPanel>
