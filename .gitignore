@@ -481,3 +481,9 @@ $RECYCLE.BIN/
 
 # VS Code
 .vscode/
+
+# Electron
+out/
+
+.yarn/
+.webpack/
