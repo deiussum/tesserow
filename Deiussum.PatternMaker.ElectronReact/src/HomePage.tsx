@@ -1,4 +1,5 @@
-
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 interface HomePageProps {
     newMosaicClicked?: () => void;
@@ -11,11 +12,11 @@ const HomePage = (props: HomePageProps) => {
     return (
         <div>
             <h1>Deiussum's Pattern Maker</h1>
-            <div id="initialButtons">
-                <button id="openNewMosaic" onClick={props.newMosaicClicked}>Create New</button>
-                <button id="loadMosaic" onClick={props.loadMosaicClicked}>Load File</button>
-                <button id="importImage" onClick={props.importImageClicked}>Import Image</button>
-            </div>
+            <ButtonGroup variant='contained' aria-label='outlined primary button group'>
+                <Button onClick={props.newMosaicClicked}>Create New</Button>
+                <Button onClick={props.loadMosaicClicked}>Load File</Button>
+                <Button onClick={props.importImageClicked}>Import Image</Button>
+            </ButtonGroup>
         </div>
     );
 }

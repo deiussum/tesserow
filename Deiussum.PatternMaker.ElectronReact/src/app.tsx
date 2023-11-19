@@ -34,6 +34,11 @@ const App = () => {
         }
     }
 
+    const mosaicClosedClicked = () => {
+        setMosaicEditorShown(false);
+        setHomePageShown(true);
+    };
+
     const importImage = async () => {
         const response = await (window as any).dialogs.import();
 
@@ -78,7 +83,7 @@ const App = () => {
         <>
             {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} loadMosaicClicked={loadMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
             {newMosaicFormShown ? <NewMosaicForm newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} /> : null }
-            {mosaicEditorShown ? <MosaicEditor /> : null }
+            {mosaicEditorShown ? <MosaicEditor closeClicked={mosaicClosedClicked} /> : null }
         </>
     );
 }

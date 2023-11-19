@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import mosaic from './Mosaic';
 import WrittenPatternDialog from './WrittenPatternDialog';
 
-const MosaicEditor = () => {
+interface MosaicEditorProps  {
+    closeClicked?: () => void;
+};
+
+const MosaicEditor = (props: MosaicEditorProps) => {
     const [ writtenPatternDialogShown, setWrittenPatternDialogShown ] = useState(false);
 
     useEffect(() => {
@@ -33,11 +39,12 @@ const MosaicEditor = () => {
     return(
         <>
             <div id="mosaic-chart">
-                <div>
-                    <button id="show-written-pattern" onClick={showWrittenPatternClicked}>Show Written Pattern</button>
-                    <button id="export-chart" onClick={exportClicked}>Export to PDF...</button>
-                    <button id="save-chart" onClick={saveClicked}>Save...</button>
-                </div>
+                <ButtonGroup variant='contained' aria-label='outlined primary button group'>
+                    <Button onClick={showWrittenPatternClicked}>Show Written Pattern</Button>
+                    <Button onClick={exportClicked}>Export to PDF</Button>
+                    <Button onClick={saveClicked}>Save</Button>
+                    <Button onClick={props.closeClicked}>Close</Button>
+                </ButtonGroup>
                 <canvas id="mosaic-canvas"></canvas>
             </div>
             {writtenPatternDialogShown ? <WrittenPatternDialog dialogClosed={closeWrittenPatternClicked} /> : null }
