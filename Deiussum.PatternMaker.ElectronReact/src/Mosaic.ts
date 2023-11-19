@@ -8,6 +8,11 @@ class Mosaic {
         this.data = new MosaicChart(width, height);
     }
 
+    load = (data:any) => {
+        this.initialize(data.width, data.height);
+        this.data.loadData(data);
+    }
+
     setupCanvas = () => {
         this.canvas = document.getElementById('mosaic-canvas');
 
@@ -167,6 +172,16 @@ class MosaicChart {
             rows: this.rows.map((row) => row.getSaveData())
         };
     }
+
+    loadData(data:any) {
+        this.width = data.width;
+        this.height = data.height;
+
+        for(let row=0;row<data.height;row++)
+        {
+            this.rows[row].loadData(data.rows[row]);
+        }
+    }
 }
 
 class MosaicRow {
@@ -246,6 +261,16 @@ class MosaicRow {
             cellCount: this.cellCount,
             cells: this.cells.map((cell) => cell.getSaveData())
         };
+    }
+
+    loadData(data: any) {
+        this.rowNumber = data.rowNumber;
+        this.cellCount = data.cellCount;
+
+        for(let col=0;col<data.cellCount;col++)
+        {
+            this.cells[col].loadData(data.cells[col]);
+        }
     }
 }
 
@@ -365,6 +390,12 @@ class MosaicCell {
             color: this.color,
             type: this.type
         };
+    }
+
+    loadData(data:any) {
+        this.columnNumber = data.columnNumber;
+        this.color = data.color;
+        this.type = data.type;
     }
 }
 

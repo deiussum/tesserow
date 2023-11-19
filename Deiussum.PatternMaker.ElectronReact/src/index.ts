@@ -24,16 +24,16 @@ const createWindow = (): void => {
   });
 
   console.log('Registering IPC handlers...');
-  ipcMain.on('save', async (x, data) => { 
+  ipcMain.handle('save', async (x, data) => { 
     return await dialogs.save(data); 
   });
-  ipcMain.on('open', async () => { 
+  ipcMain.handle('open', async () => { 
     return await dialogs.open(); 
   });
   ipcMain.handle('import', async () => { 
     return await dialogs.import(); 
   });
-  ipcMain.on('export', async (x, data) => { 
+  ipcMain.handle('export', async (x, data) => { 
     return await dialogs.export(data); 
   });
 

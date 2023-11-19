@@ -28,16 +28,17 @@ const App = () => {
     }
 
     const importMosaicClicked = async () => {
-        await importImage();
-        setHomePageShown(false);
-        setMosaicEditorShown(true);
+        if(await importImage()) {
+            setHomePageShown(false);
+            setMosaicEditorShown(true);
+        }
     }
 
     const importImage = async () => {
         const response = await (window as any).dialogs.import();
 
-        if (!response.success) return;
         console.log(response);
+        if (!response.success) return false;
 
         mosaic.initialize(response.width, response.height);
 
@@ -53,12 +54,29 @@ const App = () => {
                 if (cellColor != cell.color) cell.toggleColor();
             }
         }
+        return true;
+    }
+
+    const loadMosaicClicked = async () => {
+        if (await loadFile()) {
+            setHomePageShown(false);
+            setMosaicEditorShown(true);
+        }
+    }
+
+    const loadFile = async() => {
+        const response = await (window as any).dialogs.open();
+
         console.log(response);
+        if (!response.success) return false;
+
+        mosaic.load(response.data);
+        return true;
     }
 
     return (
         <>
-            {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
+            {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} loadMosaicClicked={loadMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
             {newMosaicFormShown ? <NewMosaicForm newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} /> : null }
             {mosaicEditorShown ? <MosaicEditor /> : null }
         </>

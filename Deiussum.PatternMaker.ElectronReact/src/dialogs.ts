@@ -15,7 +15,15 @@ class Dialogs {
     }
 
     async open() {
+        const { canceled, filePaths } = await dialog.showOpenDialog({ filters: [ {extensions: ['json'], name: 'JSON Files'}]});
+        if (canceled) return { success: false, error: 'Open cancelled' };
 
+        const filePath = filePaths[0];
+        console.log('File selected:' + filePath);
+
+        const data = fs.readFileSync(filePath).toString();
+
+        return { success: true, data: JSON.parse(data) };
     }
 
     async import() {
