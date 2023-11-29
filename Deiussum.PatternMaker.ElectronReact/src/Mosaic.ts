@@ -81,7 +81,7 @@ class MosaicChart {
         const rowIndex = Math.floor(y / mosaic.scale) - 1;
         const colIndex = Math.floor(x / mosaic.scale) - 1;
 
-        if (rowIndex < 0 || colIndex < 0) return undefined;
+        if (rowIndex < 0 || rowIndex >= this.height || colIndex < 0 || colIndex >= this.width) return undefined;
 
         const row = this.rows[rowIndex];
         return row.cells[colIndex];

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import HomePage from './HomePage';
 import NewMosaicForm from './NewMosaicForm';
 import MosaicEditor from './MosaicEditor';
+import ImagePreviewDialog from './ImagePreviewDialog';
 import mosaic from './Mosaic';
 
 
@@ -10,7 +11,8 @@ const App = () => {
     const [ homePageShown, setHomePageShown ] = useState(true);
     const [ newMosaicFormShown, setNewMosaicFormShown ] = useState(false);
     const [ mosaicEditorShown, setMosaicEditorShown ] = useState(false);
-    const [ writtenPatternDialogShown, setWrittenPatternDialogShown ] = useState(false);
+    const [ thresholdShown, setThresholdShown ] = useState(false);
+    const [ thresholdImageData, setThresholdImageData ] = useState(null);
 
     const newMosaicClicked = () => {
         setHomePageShown(false);
@@ -30,7 +32,6 @@ const App = () => {
     const importMosaicClicked = async () => {
         if(await importImage()) {
             setHomePageShown(false);
-            setMosaicEditorShown(true);
         }
     }
 
@@ -45,12 +46,21 @@ const App = () => {
         console.log(response);
         if (!response.success) return false;
 
-        mosaic.initialize(response.width, response.height);
+        setThresholdImageData(response);
+        setThresholdShown(true);
+        return true;
+    }
 
-        const threshold = 125;
-        for(let row=response.height - 1; row > 0; row--) {
-            for (let col = response.width - 1; col > 0; col--) {
-                var color = response.data[row][col];
+    const imagePreviewComplete = async (threshold: number, data: any, newWidth: number, newHeight: number) => {
+        if (newWidth != data.width || newHeight != newHeight) {
+            data = await (window as any).dialogs.resize(data.filePath, newWidth, newHeight);
+        }
+
+        mosaic.initialize(data.width, data.height);
+
+        for(let row=data.height - 1; row > 0; row--) {
+            for (let col = data.width - 1; col > 0; col--) {
+                var color = data.data[row][col];
                 var cell = mosaic.data.getCellByRowAndCol(row, col);
 
                 if (!cell) continue;
@@ -59,7 +69,8 @@ const App = () => {
                 if (cellColor != cell.color) cell.toggleColor();
             }
         }
-        return true;
+        setThresholdShown(false);
+        setMosaicEditorShown(true);
     }
 
     const loadMosaicClicked = async () => {
@@ -79,11 +90,22 @@ const App = () => {
         return true;
     }
 
+    const handlePreviewClose = () => {
+        setThresholdShown(false);
+    }
+
     return (
         <>
             {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} loadMosaicClicked={loadMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
             {newMosaicFormShown ? <NewMosaicForm newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} /> : null }
             {mosaicEditorShown ? <MosaicEditor closeClicked={mosaicClosedClicked} /> : null }
+            {thresholdShown 
+            ? <ImagePreviewDialog open={thresholdShown} 
+                               data={thresholdImageData} 
+                               handleClose={handlePreviewClose} 
+                               onImagePreviewComplete={imagePreviewComplete} /> 
+            : null }
+
         </>
     );
 }

@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('dialogs', {
   save: async (data: any): Promise<any> => { return await ipcRenderer.invoke('save', data); },
   open: async (): Promise<any> => { return await ipcRenderer.invoke('open'); },
   import: async (): Promise<any> => { return await ipcRenderer.invoke('import'); },
+  resize: async (filePath: string, width: number, height: number): Promise<any> => { return await ipcRenderer.invoke('resize', filePath, width, height); },
   export: async (data: any): Promise<any> => { return await ipcRenderer.invoke('export', data); }
 });

@@ -40,6 +40,9 @@ const createWindow = (): void => {
   ipcMain.handle('export', async (x, data) => { 
     return await dialogs.export(data); 
   });
+  ipcMain.handle('resize', async(x, filePath:string, width:number, height:number) => {
+    return await dialogs.resize(filePath, width, height);
+  });
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);

@@ -27,21 +27,46 @@ class Dialogs {
     }
 
     async import() {
-        const { canceled, filePaths } = await dialog.showOpenDialog({ filters: [ {extensions: ['png'], name: 'Image Files'}]});
+        const { canceled, filePaths } = await dialog.showOpenDialog({ filters: [ {extensions: ['png', 'jpeg', 'jpg', 'gif'], name: 'Image Files'}]});
         if (canceled) return { success: false, error: 'Import cancelled' };
 
         const filePath = filePaths[0];
 
-        console.log('File selected:' + filePath);
+        let image = await Jimp.read(filePath);
+        const imageThreshold = 300;
+        const w = image.bitmap.width;
+        const h = image.bitmap.height;
+
+        if (w > imageThreshold || h > imageThreshold) 
+        {
+            const newWidth = w > h ? imageThreshold : imageThreshold * w / h;
+            const newHeight = h > w ? imageThreshold : imageThreshold * h / w;
+
+            console.log(`Resizing ${w}, ${h} => ${newWidth}, ${newHeight}`);
+
+            image.resize(newWidth, newHeight);
+        }
+
+        return this.getImageData(image, filePath);
+    }
+
+    async resize(filePath: string, width: number, height: number) {
+        console.log(`Resizing file to ${width}x${height}: ${filePath}`)
         let image = await Jimp.read(filePath);
 
-        console.log('Converting to greyscale...');
+        image.resize(width, height);
+
+        return this.getImageData(image, filePath);
+    }
+
+    getImageData(image: Jimp, filePath: string) {
         image.greyscale();
         var data:any = {
             success: true,
+            filePath: filePath,
             width: image.bitmap.width,
             height: image.bitmap.height,
-            data: []
+            data: [],
         }
 
         console.log('Gathering data...');
@@ -56,7 +81,6 @@ class Dialogs {
         }
 
         console.log('Data built.');
-
         return data;
     }
 
