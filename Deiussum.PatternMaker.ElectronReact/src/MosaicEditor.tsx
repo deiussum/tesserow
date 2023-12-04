@@ -47,7 +47,7 @@ const MosaicEditor = (props: MosaicEditorProps) => {
                 </ButtonGroup>
                 <canvas id="mosaic-canvas"></canvas>
             </div>
-            {writtenPatternDialogShown ? <WrittenPatternDialog dialogClosed={closeWrittenPatternClicked} /> : null }
+            <WrittenPatternDialog open={writtenPatternDialogShown} dialogClosed={closeWrittenPatternClicked} />
         </>
     )
 }

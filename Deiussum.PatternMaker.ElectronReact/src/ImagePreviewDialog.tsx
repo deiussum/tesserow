@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -23,7 +24,6 @@ const ImagePreviewDialog = (props: ThresholdDialogProps) => {
     const drawImage = () => {
         let canvas = canvasRef.current;
 
-        const canvas2 = document.getElementById('threshold-canvas');
         if (!canvas || !props.open) return;
 
         canvas.width = props.data.width * 2;
@@ -35,7 +35,7 @@ const ImagePreviewDialog = (props: ThresholdDialogProps) => {
             for (let col = 0; col < props.data.width; col++) {
                 var color = props.data.data[row][col];
 
-                ctx.fillStyle = color > threshold ? "white" : "black";
+                ctx.fillStyle = color >= threshold ? "white" : "black";
                 ctx.fillRect(col, row, col, row);
             }
         }
@@ -70,7 +70,7 @@ const ImagePreviewDialog = (props: ThresholdDialogProps) => {
     }, [threshold]);
 
     return (
-        <Dialog open={props.open} onClose={props.handleClose} fullScreen >
+        <Dialog open={props.open} onClose={props.handleClose}>
             <DialogTitle>Adjust threshold</DialogTitle>
             <DialogContent>
                 <DialogContentText>Adjust the threshold to get the desired black/white ratio</DialogContentText>
@@ -79,11 +79,13 @@ const ImagePreviewDialog = (props: ThresholdDialogProps) => {
                 <TextField label="Width" name="width" value={inputs.width} type="number" onChange={setSize}></TextField>
                 <TextField label="Height" name="height" value={inputs.height} type="number" onChange={setSize}></TextField>
                 <canvas id='threshold-canvas' ref={canvasRef}></canvas>
-                <DialogActions>
+            </DialogContent>
+            <DialogActions>
+                <ButtonGroup variant='contained'>
                     <Button onClick={props.handleClose}>Cancel</Button>
                     <Button onClick={importClicked}>Import</Button>
-                </DialogActions>
-            </DialogContent>
+                </ButtonGroup>
+            </DialogActions>
         </Dialog>
     );
 }

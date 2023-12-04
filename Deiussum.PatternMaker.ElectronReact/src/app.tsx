@@ -15,24 +15,21 @@ const App = () => {
     const [ thresholdImageData, setThresholdImageData ] = useState(null);
 
     const newMosaicClicked = () => {
-        setHomePageShown(false);
         setNewMosaicFormShown(true);
     }
 
     const newMosaicCreated = () => {
         setNewMosaicFormShown(false);
+        setHomePageShown(false);
         setMosaicEditorShown(true);
     }
 
     const newMosaicCancelled = () => {
         setNewMosaicFormShown(false);
-        setHomePageShown(true);
     }
 
     const importMosaicClicked = async () => {
-        if(await importImage()) {
-            setHomePageShown(false);
-        }
+        await importImage();
     }
 
     const mosaicClosedClicked = () => {
@@ -70,6 +67,7 @@ const App = () => {
             }
         }
         setThresholdShown(false);
+        setHomePageShown(false);
         setMosaicEditorShown(true);
     }
 
@@ -97,7 +95,7 @@ const App = () => {
     return (
         <>
             {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} loadMosaicClicked={loadMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
-            {newMosaicFormShown ? <NewMosaicForm newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} /> : null }
+            <NewMosaicForm open={newMosaicFormShown} newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} />
             {mosaicEditorShown ? <MosaicEditor closeClicked={mosaicClosedClicked} /> : null }
             {thresholdShown 
             ? <ImagePreviewDialog open={thresholdShown} 

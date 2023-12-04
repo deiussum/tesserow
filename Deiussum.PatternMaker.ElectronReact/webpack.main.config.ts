@@ -1,6 +1,20 @@
 import type { Configuration } from 'webpack';
+// @ts-ignore
+import path from 'path';
 
 import { rules } from './webpack.rules';
+
+rules.push(
+  {
+    test: /\.(ico|gif|png|jpg|jpeg|svg)$/i,
+    type: 'asset/resource',
+    include: [
+      // @ts-ignore
+      path.resolve(__dirname, "src/assets")
+    ]
+
+  }
+)
 
 export const mainConfig: Configuration = {
   /**

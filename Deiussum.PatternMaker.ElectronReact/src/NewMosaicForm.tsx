@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
 import mosaic from './Mosaic';
 
 interface NewMosaicFormProps {
+    open: boolean,
     newMosaicCreated?: () => void;
     newMosaicCancelled?: () => void;
     width?: number;
@@ -26,20 +34,18 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
     }
 
     return (
-        <div id="newMosaicForm">
-            <div>
-                <label htmlFor="newWidth">Width:</label>
-                <input id="newWidth" name="newWidth" type="number" min="0" value={width} onChange={widthChanged}/>
-            </div>
-            <div>
-                <label htmlFor="newHeight">Height:</label>
-                <input id="newHeight" name="newHeight" type="number" min="0" value={height} onChange={heightChanged}/>
-            </div>
-            <div>
-                <button id="cancelNewMosaic" onClick={props.newMosaicCancelled}>Cancel</button>
-                <button id="createNewMosaic" onClick={createClicked}>Create</button>
-            </div>
-        </div>
+        <Dialog open={props.open}>
+            <DialogTitle>New Mosaic</DialogTitle>
+            <DialogContent>
+                <DialogContentText>Set the height & width of your new mosaic.</DialogContentText>
+                <TextField id="newWidth" name="newWidth" type="number" label="Width" value={width} onChange={widthChanged}/>
+                <TextField id="newHeight" name="newHeight" type="number" label="Height" value={height} onChange={heightChanged}/>
+                <DialogActions>
+                    <Button id="cancelNewMosaic" onClick={props.newMosaicCancelled}>Cancel</Button>
+                    <Button id="createNewMosaic" onClick={createClicked}>Create</Button>
+                </DialogActions>
+            </DialogContent>
+        </Dialog>
     );
 }
 

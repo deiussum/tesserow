@@ -21,11 +21,13 @@ const createWindow = (): void => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1200,
-    height: 800,
+    height: 825,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-    },
+    }
   });
+
+  mainWindow.removeMenu();
 
   console.log('Registering IPC handlers...');
   ipcMain.handle('save', async (x, data) => { 
