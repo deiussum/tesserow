@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
+import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import mosaic from './Mosaic';
 import WrittenPatternDialog from './WrittenPatternDialog';
+import StatusBar from './StatusBar';
+import styles from './MosaicEditor.module.css';
 
 interface MosaicEditorProps  {
     closeClicked?: () => void;
@@ -10,10 +13,17 @@ interface MosaicEditorProps  {
 
 const MosaicEditor = (props: MosaicEditorProps) => {
     const [ writtenPatternDialogShown, setWrittenPatternDialogShown ] = useState(false);
+    const [ zoomLevel, setZoomLevel ] = useState(1.0);
+    const [ zoomString, setZoomString ] = useState('Zoom: 100%');
 
     useEffect(() => {
         mosaic.setupCanvas();
-    });
+    }, []);
+
+    useEffect(() => {
+        setZoomStringFromZoom(zoomLevel);
+        mosaic.draw(zoomLevel);
+    }, [zoomLevel]);
 
     const showWrittenPatternClicked = () => {
         setWrittenPatternDialogShown(true);
@@ -36,18 +46,35 @@ const MosaicEditor = (props: MosaicEditorProps) => {
         await (window as any).dialogs.save(data);
     }
 
+    const zoomInClicked = () => {
+        setZoomLevel(zoomLevel + 0.1);
+    }
+
+    const zoomOutClicked = () => {
+        setZoomLevel(zoomLevel - 0.1);
+    }
+
+    const setZoomStringFromZoom = (zoom:number) => {
+        setZoomString(`Zoom: ${(zoom * 100).toFixed(0)}%`);
+    }
+
     return(
         <>
-            <div id="mosaic-chart">
+            <AppBar>
                 <ButtonGroup variant='contained' aria-label='outlined primary button group'>
                     <Button onClick={showWrittenPatternClicked}>Show Written Pattern</Button>
                     <Button onClick={exportClicked}>Export to PDF</Button>
                     <Button onClick={saveClicked}>Save</Button>
+                    <Button onClick={zoomInClicked}>Zoom In</Button>
+                    <Button onClick={zoomOutClicked}>Zoom Out</Button>
                     <Button onClick={props.closeClicked}>Close</Button>
                 </ButtonGroup>
+            </AppBar>
+            <div id="mosaic-chart" className={styles.editorPane}>
                 <canvas id="mosaic-canvas"></canvas>
             </div>
             <WrittenPatternDialog open={writtenPatternDialogShown} dialogClosed={closeWrittenPatternClicked} />
+            <StatusBar leftText='Test' rightText={zoomString} />
         </>
     )
 }

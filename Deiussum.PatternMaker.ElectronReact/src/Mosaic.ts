@@ -1,4 +1,5 @@
 class Mosaic {
+    defaultScale: number = 15;
     scale: number = 15;
     canvas: any = null;
     data: MosaicChart = null;
@@ -47,6 +48,11 @@ class Mosaic {
         });
 
         this.data.draw();
+    }
+
+    draw(zoomLevel: number) {
+        this.scale = this.defaultScale * zoomLevel;
+        this.setupCanvas();
     }
 }
 
