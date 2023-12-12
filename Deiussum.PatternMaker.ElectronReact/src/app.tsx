@@ -13,6 +13,7 @@ const App = () => {
     const [ mosaicEditorShown, setMosaicEditorShown ] = useState(false);
     const [ thresholdShown, setThresholdShown ] = useState(false);
     const [ thresholdImageData, setThresholdImageData ] = useState(null);
+    const [ statusText, setStatusText ] = useState('Ready');
 
     const newMosaicClicked = () => {
         setNewMosaicFormShown(true);

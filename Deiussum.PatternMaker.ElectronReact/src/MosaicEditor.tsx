@@ -15,6 +15,8 @@ const MosaicEditor = (props: MosaicEditorProps) => {
     const [ writtenPatternDialogShown, setWrittenPatternDialogShown ] = useState(false);
     const [ zoomLevel, setZoomLevel ] = useState(1.0);
     const [ zoomString, setZoomString ] = useState('Zoom: 100%');
+    const [ statusText, setStatusText ] = useState('Ready');
+    const [ middleText, setMiddleStatusText ] = useState('');
 
     useEffect(() => {
         mosaic.setupCanvas();
@@ -34,16 +36,20 @@ const MosaicEditor = (props: MosaicEditorProps) => {
     }
 
     const exportClicked = async () => {
+        setStatusText('Exporting...');
         const data = {
             chartPages: mosaic.data.getChartPageData(),
             writtenPatternLines: mosaic.data.getWrittenPatternLines(16, 65)
         };
         await (window as any).dialogs.export(data);
+        setStatusText('Exported');
     }
 
     const saveClicked = async() => {
+        setStatusText('Saving...');
         const data = mosaic.data.getSaveData();
         await (window as any).dialogs.save(data);
+        setStatusText('Saved');
     }
 
     const zoomInClicked = () => {
@@ -74,7 +80,7 @@ const MosaicEditor = (props: MosaicEditorProps) => {
                 <canvas id="mosaic-canvas"></canvas>
             </div>
             <WrittenPatternDialog open={writtenPatternDialogShown} dialogClosed={closeWrittenPatternClicked} />
-            <StatusBar leftText='Test' rightText={zoomString} />
+            <StatusBar leftText={statusText} middleText={middleText} rightText={zoomString} />
         </>
     )
 }

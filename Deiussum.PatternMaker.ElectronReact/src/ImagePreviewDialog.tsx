@@ -71,9 +71,11 @@ const ImagePreviewDialog = (props: ThresholdDialogProps) => {
 
     return (
         <Dialog open={props.open} onClose={props.handleClose}>
-            <DialogTitle>Adjust threshold</DialogTitle>
+            <DialogTitle>Image Preview</DialogTitle>
             <DialogContent>
-                <DialogContentText>Adjust the threshold to get the desired black/white ratio</DialogContentText>
+                <DialogContentText>
+                    Adjust the size of the image and the threshold to get the desired black/white ratio
+                </DialogContentText>
                 <span>Current Threshold: {threshold}</span>
                 <Slider defaultValue={128} onChange={thresholdChange} min={0} max={255} step={1} />
                 <TextField label="Width" name="width" value={inputs.width} type="number" onChange={setSize}></TextField>

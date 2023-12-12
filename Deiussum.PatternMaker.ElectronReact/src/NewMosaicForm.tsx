@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -41,8 +42,10 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
                 <TextField id="newWidth" name="newWidth" type="number" label="Width" value={width} onChange={widthChanged}/>
                 <TextField id="newHeight" name="newHeight" type="number" label="Height" value={height} onChange={heightChanged}/>
                 <DialogActions>
-                    <Button id="cancelNewMosaic" onClick={props.newMosaicCancelled}>Cancel</Button>
-                    <Button id="createNewMosaic" onClick={createClicked}>Create</Button>
+                    <ButtonGroup variant='contained'>
+                        <Button id="cancelNewMosaic" onClick={props.newMosaicCancelled}>Cancel</Button>
+                        <Button id="createNewMosaic" onClick={createClicked}>Create</Button>
+                    </ButtonGroup>
                 </DialogActions>
             </DialogContent>
         </Dialog>
