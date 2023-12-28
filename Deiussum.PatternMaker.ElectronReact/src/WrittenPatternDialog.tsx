@@ -16,7 +16,7 @@ interface WrittenPatternDialogProps {
 
 const WrittenPatternDialog = (props: WrittenPatternDialogProps) => {
 
-    const [ writtenPattern ] = useState(mosaic.data.getWrittenPattern());
+    const [ writtenPattern ] = useState(mosaic.data ? mosaic.data.getWrittenPattern() : null);
 
     const copyWrittenPattern = () => {
         const patternText = document.getElementById('written-pattern-text');

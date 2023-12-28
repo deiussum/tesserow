@@ -11,8 +11,8 @@ const App = () => {
     const [ homePageShown, setHomePageShown ] = useState(true);
     const [ newMosaicFormShown, setNewMosaicFormShown ] = useState(false);
     const [ mosaicEditorShown, setMosaicEditorShown ] = useState(false);
-    const [ thresholdShown, setThresholdShown ] = useState(false);
-    const [ thresholdImageData, setThresholdImageData ] = useState(null);
+    const [ previewShown, setPreviewShown ] = useState(false);
+    const [ previewImageData, setPreviewImageData ] = useState(null);
     const [ statusText, setStatusText ] = useState('Ready');
 
     const newMosaicClicked = () => {
@@ -44,22 +44,27 @@ const App = () => {
         console.log(response);
         if (!response.success) return false;
 
-        setThresholdImageData(response);
-        setThresholdShown(true);
+        setPreviewImageData(response);
+        setPreviewShown(true);
         return true;
     }
 
-    const imagePreviewComplete = async (threshold: number, data: any, newWidth: number, newHeight: number) => {
+    const onResizePreview = async (data: any, width: number, height: number) => {
+        data = await (window as any).dialogs.resize(data.filePath, width, height);
+        setPreviewImageData(data);
+    }
+
+    const imagePreviewComplete = async (threshold: number, data: any, newWidth: number, newHeight: number, extraRows: number) => {
         if (newWidth != data.width || newHeight != newHeight) {
             data = await (window as any).dialogs.resize(data.filePath, newWidth, newHeight);
         }
 
-        mosaic.initialize(data.width, data.height);
+        mosaic.initialize(data.width, data.height, extraRows);
 
         for(let row=data.height - 1; row > 0; row--) {
             for (let col = data.width - 1; col > 0; col--) {
                 var color = data.data[row][col];
-                var cell = mosaic.data.getCellByRowAndCol(row, col);
+                var cell = mosaic.data.getCellByRowAndCol(row + extraRows, col);
 
                 if (!cell) continue;
 
@@ -67,7 +72,7 @@ const App = () => {
                 if (cellColor != cell.color) cell.toggleColor();
             }
         }
-        setThresholdShown(false);
+        setPreviewShown(false);
         setHomePageShown(false);
         setMosaicEditorShown(true);
     }
@@ -90,7 +95,7 @@ const App = () => {
     }
 
     const handlePreviewClose = () => {
-        setThresholdShown(false);
+        setPreviewShown(false);
     }
 
     return (
@@ -98,11 +103,12 @@ const App = () => {
             {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} loadMosaicClicked={loadMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
             <NewMosaicForm open={newMosaicFormShown} newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} />
             {mosaicEditorShown ? <MosaicEditor closeClicked={mosaicClosedClicked} /> : null }
-            {thresholdShown 
-            ? <ImagePreviewDialog open={thresholdShown} 
-                               data={thresholdImageData} 
+            {previewShown 
+            ? <ImagePreviewDialog open={previewShown} 
+                               data={previewImageData} 
                                handleClose={handlePreviewClose} 
-                               onImagePreviewComplete={imagePreviewComplete} /> 
+                               onImagePreviewComplete={imagePreviewComplete} 
+                               onResizePreviewData={onResizePreview}/> 
             : null }
 
         </>

@@ -4,13 +4,16 @@ class Mosaic {
     canvas: any = null;
     data: MosaicChart = null;
     hovering: any = null;
+    #eventListenersSet: boolean = false;
 
-    initialize = (width: number, height: number) => {
+    initialize = (width: number, height: number, extraRows: number) => {
         this.data = new MosaicChart(width, height);
+
+        if (extraRows > 0) this.data.addExtraRows(extraRows);
     }
 
     load = (data:any) => {
-        this.initialize(data.width, data.height);
+        this.initialize(data.width, data.height, 0);
         this.data.loadData(data);
     }
 
@@ -20,7 +23,19 @@ class Mosaic {
         this.canvas.width = (this.data.width * this.scale) + (this.scale * 2);
         this.canvas.height = (this.data.height * this.scale) + (this.scale * 2);
 
-        this.canvas.addEventListener('mousemove', (e: any) => {
+        this.#setupEventListeners();
+
+        this.data.draw();
+    }
+
+    draw(zoomLevel: number) {
+        this.scale = this.defaultScale * zoomLevel;
+        this.setupCanvas();
+    }
+
+    #setupEventListeners() {
+        if (this.#eventListenersSet) return;
+        const mouseMove = (e: any) => {
             const canvasX = e.offsetX;
             const canvasY = e.offsetY;
             const hoverCell = this.data.getCellByCoords(canvasX, canvasY);
@@ -35,9 +50,10 @@ class Mosaic {
             hoverCell.highlight(ctx);
             this.canvas.setAttribute('title', `Row: ${hoverCell.row.rowNumber}, Column: ${hoverCell.columnNumber}`);
             this.hovering = hoverCell;
-        });
+        };
+        this.canvas.addEventListener('mousemove', mouseMove);
 
-        this.canvas.addEventListener('click', (e: any) => {
+        const canvasClicked = (e: any) => {
             const canvasX = e.offsetX;
             const canvasY = e.offsetY;
             const clickedCell = this.data.getCellByCoords(canvasX, canvasY);
@@ -45,20 +61,17 @@ class Mosaic {
             if (clickedCell === undefined) return;
 
             clickedCell.toggleColor();
-        });
+        };
+        this.canvas.addEventListener('click', canvasClicked);
 
-        this.data.draw();
-    }
-
-    draw(zoomLevel: number) {
-        this.scale = this.defaultScale * zoomLevel;
-        this.setupCanvas();
+        this.#eventListenersSet = true;
     }
 }
 
 class MosaicChart {
     width: number;
     height: number;
+    extraRows: number;
     rows: MosaicRow[];
 
     constructor(width: number, height: number) {
@@ -70,6 +83,24 @@ class MosaicChart {
             this.rows.push(new MosaicRow(height - i, width, (height - i - 1) % 2));
         }
     }
+
+    addExtraRows(count: number) {
+        for(let i = 0; i < count; i++) {
+            const bottomRow = new MosaicRow(count - i, this.width, 0);
+            const topRow = new MosaicRow(this.height + i, this.width, 0);
+
+            this.rows.push(topRow);
+            this.rows.splice(0, 0, bottomRow);
+        }
+
+        this.height += count * 2;
+        this.rows.forEach((row, index) => {
+            row.updateRowNumber(this.height - index);
+        });
+
+        this.extraRows = count;
+    }
+
     draw() {
         const ctx = mosaic.canvas.getContext('2d');
 
@@ -127,6 +158,7 @@ class MosaicChart {
         let pattern = '';
         for (let rowIndex = this.height - 1; rowIndex >=0; rowIndex--) {
             const row = this.rows[rowIndex];
+            if (!row) continue; // Why is this bad?
 
             pattern += row.getWrittenPattern(column1Length, totalWidth);
         }
@@ -175,6 +207,7 @@ class MosaicChart {
         return {
             width: this.width,
             height: this.height,
+            extraRows: this.extraRows,
             rows: this.rows.map((row) => row.getSaveData())
         };
     }
@@ -182,6 +215,7 @@ class MosaicChart {
     loadData(data:any) {
         this.width = data.width;
         this.height = data.height;
+        this.extraRows = data.extraRows;
 
         for(let row=0;row<data.height;row++)
         {
@@ -277,6 +311,10 @@ class MosaicRow {
         {
             this.cells[col].loadData(data.cells[col]);
         }
+    }
+
+    updateRowNumber(newRow: number) {
+        this.rowNumber = newRow;
     }
 }
 

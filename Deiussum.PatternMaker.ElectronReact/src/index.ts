@@ -24,10 +24,10 @@ const createWindow = (): void => {
     height: 825,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-    }
+    },
   });
 
-  mainWindow.removeMenu();
+  // mainWindow.removeMenu();
 
   console.log('Registering IPC handlers...');
   ipcMain.handle('save', async (x, data) => { 

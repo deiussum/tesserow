@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
+import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import mosaic from './Mosaic';
 
@@ -15,39 +19,96 @@ interface NewMosaicFormProps {
     newMosaicCancelled?: () => void;
     width?: number;
     height?: number;
+    extraRowsChecked?: boolean;
+    extraRows?: number;
 }
 
 const NewMosaicForm = (props: NewMosaicFormProps) => {
-    const [ width, setWidth ] = useState(props.width);
-    const [ height, setHeight ] = useState(props.height);
+    const [ inputs, setInputs ] = useState({ 
+        width: props.width, 
+        height: props.height,
+        extraRowsChecked: props.extraRowsChecked,
+        extraRows: props.extraRows
+    });
 
-    const widthChanged = (e: React.ChangeEvent<any>) => {
-        setWidth(e.target.value);
+    const [ errors, setErrors ] = useState({
+        width: false,
+        height: false,
+        extraRows: false
+    });
+
+    const setInput = (e:React.ChangeEvent<any>) => {
+        setInputs({ ...inputs, [e.target.name]: e.target.value});
+
+        const error = !e.target.value;
+        setErrors({ ...errors, [e.target.name]: error});
     }
 
-    const heightChanged = (e: React.ChangeEvent<any>) => {
-        setHeight(e.target.value);
+    const setBooleanInput = (e:React.ChangeEvent<any>) => {
+        const value = e.target.checked;
+        setInputs({ ...inputs, [e.target.name]: value});
     }
 
-    const createClicked = () => {
-        mosaic.initialize(width, height);
+    const createClicked = (evt: React.FormEvent<HTMLFormElement>) => {
+        evt.preventDefault();
+
+        const extraRows = inputs.extraRowsChecked ? Number(inputs.extraRows) : 0;
+        mosaic.initialize(Number(inputs.width), Number(inputs.height), extraRows);
         props.newMosaicCreated();
     }
 
     return (
         <Dialog open={props.open}>
             <DialogTitle>New Mosaic</DialogTitle>
-            <DialogContent>
-                <DialogContentText>Set the height & width of your new mosaic.</DialogContentText>
-                <TextField id="newWidth" name="newWidth" type="number" label="Width" value={width} onChange={widthChanged}/>
-                <TextField id="newHeight" name="newHeight" type="number" label="Height" value={height} onChange={heightChanged}/>
+            <Box component='form' onSubmit={createClicked} >
+                <DialogContent>
+                    <DialogContentText>Set the height & width of your new mosaic.</DialogContentText>
+                    <Box my={1}>
+                        <TextField name="width" 
+                            type="number" 
+                            label="Width" 
+                            value={inputs.width} 
+                            onChange={setInput} 
+                            required={true} 
+                            error={errors.width} />
+                        <TextField name="height" 
+                            type="number" 
+                            label="Height" 
+                            value={inputs.height} 
+                            onChange={setInput} 
+                            required={true}
+                            error={errors.height}/>
+                    </Box>
+                    <Box my={2}>
+                        <Divider />
+                    </Box>
+                    <Box my={1}>
+                        <DialogContentText>
+                            Check this box and set a number of rows if you want to include extra starting rows of the same color.
+                        </DialogContentText>
+                        <FormControlLabel label="Include extra starting row" 
+                                            control={<Checkbox name="extraRowsChecked" 
+                                                                checked={inputs.extraRowsChecked} 
+                                                                onChange={setBooleanInput}/>}/>
+                    </Box>
+                    <Box my={1}>
+                        <TextField label="Extra rows" 
+                                    name="extraRows" 
+                                    value={inputs.extraRows} 
+                                    disabled={!inputs.extraRowsChecked} 
+                                    type="number" 
+                                    required={inputs.extraRowsChecked}
+                                    error={errors.extraRows}
+                                    onChange={setInput}/>
+                    </Box>
+                </DialogContent>
                 <DialogActions>
                     <ButtonGroup variant='contained'>
-                        <Button id="cancelNewMosaic" onClick={props.newMosaicCancelled}>Cancel</Button>
-                        <Button id="createNewMosaic" onClick={createClicked}>Create</Button>
+                        <Button onClick={props.newMosaicCancelled}>Cancel</Button>
+                        <Button type='submit'>Create</Button>
                     </ButtonGroup>
                 </DialogActions>
-            </DialogContent>
+            </Box>
         </Dialog>
     );
 }
