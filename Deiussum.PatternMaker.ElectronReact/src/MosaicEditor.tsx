@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
+import ExportDialog from './ExportDialog';
+import ExportOptions from './ExportOptions';
 import mosaic from './Mosaic';
 import WrittenPatternDialog from './WrittenPatternDialog';
 import StatusBar from './StatusBar';
@@ -12,6 +14,7 @@ interface MosaicEditorProps  {
 };
 
 const MosaicEditor = (props: MosaicEditorProps) => {
+    const [ exportDialogShown, setExportDialogShown ] = useState(false);
     const [ writtenPatternDialogShown, setWrittenPatternDialogShown ] = useState(false);
     const [ zoomLevel, setZoomLevel ] = useState(1.0);
     const [ zoomString, setZoomString ] = useState('Zoom: 100%');
@@ -35,13 +38,22 @@ const MosaicEditor = (props: MosaicEditorProps) => {
         setWrittenPatternDialogShown(false);
     }
 
+    const exportCanceled = () => {
+        setExportDialogShown(false);
+    }
+
     const exportClicked = async () => {
+        setExportDialogShown(true);
+    }
+
+    const exportConfirmed = async (options:ExportOptions) => {
+        setExportDialogShown(false);
         setStatusText('Exporting...');
         const data = {
             chartPages: mosaic.data.getChartPageData(),
             writtenPatternLines: mosaic.data.getWrittenPatternLines(16, 65)
         };
-        await (window as any).dialogs.export(data);
+        await (window as any).dialogs.export(data, options);
         setStatusText('Exported');
     }
 
@@ -80,6 +92,7 @@ const MosaicEditor = (props: MosaicEditorProps) => {
                 <canvas id="mosaic-canvas"></canvas>
             </div>
             <WrittenPatternDialog open={writtenPatternDialogShown} dialogClosed={closeWrittenPatternClicked} />
+            <ExportDialog open={exportDialogShown} dialogClosed={exportCanceled} exportClicked={exportConfirmed}/>
             <StatusBar leftText={statusText} middleText={middleText} rightText={zoomString} />
         </>
     )

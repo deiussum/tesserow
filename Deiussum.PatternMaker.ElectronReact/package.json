@@ -1,6 +1,6 @@
 {
-  "name": "electronreact",
-  "productName": "electronreact",
+  "name": "deiussumpattern",
+  "productName": "deiussumpattern",
   "version": "1.0.0",
   "description": "Deiussum's Pattern Maker",
   "main": ".webpack/main",
@@ -14,7 +14,7 @@
   "keywords": [],
   "author": {
     "name": "Dan Jenkins",
-    "email": "djenkins@nexusinnovations.com"
+    "email": "deiussum@gmail.com"
   },
   "license": "MIT",
   "devDependencies": {
@@ -50,10 +50,13 @@
     "@mui/icons-material": "^5.14.18",
     "@mui/material": "^5.14.18",
     "@types/pdfkit": "^0.13.2",
+    "@types/uuid": "^9.0.7",
     "electron-squirrel-startup": "^1.0.0",
     "jimp": "^0.5.6",
+    "pdf-merger-js": "^5.0.0",
     "pdfkit": "^0.14.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "uuid": "^9.0.1"
   }
 }

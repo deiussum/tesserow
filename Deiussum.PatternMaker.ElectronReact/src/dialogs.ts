@@ -1,9 +1,31 @@
 import { dialog } from 'electron';
-import Jimp from 'jimp';
-import PDFDocument from 'pdfkit';
 import fs from 'fs';
+import Jimp from 'jimp';
+import path from 'node:path';
+import PDFDocument from 'pdfkit';
+import PDFMerger from 'pdf-merger-js';
+import { v4 as uuidv4 } from 'uuid';
+import ExportOptions from './ExportOptions';
 
 class Dialogs {
+    async getFileName(filters: any, save: boolean) {
+        let success = true;
+        let result = '';
+        if (save === true) {
+            const { canceled, filePath } =  await dialog.showSaveDialog({ filters: filters});
+            success = !canceled;
+            result = filePath;
+        }
+        else {
+             const { canceled, filePaths } = await dialog.showOpenDialog({ filters: filters});
+            success = !canceled;
+            result = filePaths[0];
+        }
+        if (!success) return { success: false, error: 'Cancelled' };
+
+        return { success, result };
+    }
+
     async save(data: any) {
         const { canceled, filePath } = await dialog.showSaveDialog({ filters: [ { extensions: ['json'], name: 'JSON Files' }]});
         if (canceled) return { success: false, error: 'Save cancelled' };
@@ -84,26 +106,46 @@ class Dialogs {
         return data;
     }
 
-    async export(data: any) {
-        const { canceled, filePath } = await dialog.showSaveDialog({ filters: [ {extensions: ['pdf'], name: 'PDF Files'}]});
-        if (canceled) return { success: false, error: 'Save cancelled' };
+    async export(data: any, options: ExportOptions) {
+        const filePath = options.exportFileName;
+        const exportFilePath = options.additionalPdfChecked ? this.#tempFilePath(filePath) : filePath;
 
         const doc = new PDFDocument({ bufferPages: true });
-        doc.pipe(fs.createWriteStream(filePath));
+        const stream = fs.createWriteStream(exportFilePath);
+        doc.pipe(stream);
 
-        for(let pageIndex=0; pageIndex<data.chartPages.length; pageIndex++) {
-            this.drawChartPage(doc, data.chartPages[pageIndex]);
+        if (options.includeChart) {
+            for(let pageIndex=0; pageIndex<data.chartPages.length; pageIndex++) {
+                this.drawChartPage(doc, data.chartPages[pageIndex]);
+            }
         }
 
-        for(let i=0; i<data.writtenPatternLines.length; i++) {
-            doc.font('Courier')
-               .fontSize(12)
-               .text(data.writtenPatternLines[i]);
-            doc.moveDown(0.5);
+        if (options.includeWrittenPattern) {
+            for(let i=0; i<data.writtenPatternLines.length; i++) {
+                doc.font('Courier')
+                .fontSize(12)
+                .text(data.writtenPatternLines[i]);
+                doc.moveDown(0.5);
+            }
         }
 
-        this.addPdfFooterToAllPages(doc);
+        this.addPdfFooterToAllPages(doc, Number(options.pageStart));
+
+        stream.on('finish', async () => {
+            if (options.additionalPdfChecked) {
+                const merger = new PDFMerger();
+
+                await merger.add(options.additionalPdfFileName);
+                await merger.add(exportFilePath);
+                await merger.save(filePath);
+                
+                setTimeout(() => {
+                    fs.unlinkSync(exportFilePath);
+                }, 1000);
+            }
+        });
         doc.end();
+
     }
 
     drawChartPage(doc: any, page: any) {
@@ -169,11 +211,11 @@ class Dialogs {
         doc.addPage();
     }
 
-    addPdfFooterToAllPages(doc: any) {
+    addPdfFooterToAllPages(doc: any, startPage: number) {
         let pages = doc.bufferedPageRange();
         for(let i=0; i<pages.count; i++) {
             doc.switchToPage(i);
-            this.addPdfFooter(doc, i + 1, pages.count);
+            this.addPdfFooter(doc, i + startPage, pages.count + startPage - 1);
         }
     }
 
@@ -188,6 +230,16 @@ class Dialogs {
                 , doc.page.height - (bottom/2)
                 , { align: 'center'});
         doc.page.margins.bottom = bottom;
+    }
+
+    #tempFilePath(filePath: string) {
+        const baseName = path.basename(filePath, '.pdf');
+        const id = uuidv4().replace('-', '');
+        const tempName = baseName + id + '.pdf';
+        const dirName = path.dirname(filePath);
+        const fullTempPath = path.join(dirName, tempName);
+
+        return fullTempPath;
     }
 }
 

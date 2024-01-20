@@ -14,7 +14,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 
-interface ThresholdDialogProps {
+interface ImagePreviewDialogProps {
     data?: any;
     open: boolean;
     handleClose: () => void;
@@ -26,7 +26,7 @@ const thresholdCanvasStyle = {
     border: '1px black solid'
 };
 
-const ImagePreviewDialog = (props: ThresholdDialogProps) => {
+const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
     const [ threshold, setThreshold ] = useState(-1);
     const [ inputs, setInputs ] = useState({ 
         threshold: -1, 
