@@ -1,0 +1,17 @@
+[
+    {
+        "title": "News item 1",
+        "description": "News item 1 description",
+        "postDate": "2024-01-01 10:00:00"
+    },
+    {
+        "title": "News item 2",
+        "description": "News item 2 description",
+        "postDate": "2024-01-05 12:00:00"
+    },
+    {
+        "title": "News item 3",
+        "description": "News item 3 description",
+        "postDate": "2024-01-25 15:00:00"
+    }
+]

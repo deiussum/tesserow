@@ -12,7 +12,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 
-const pages = ['News', 'Help', 'About'];
+const pages = ['News', 'Features', 'Help' ];
 
 export default function NavBar() {
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -58,7 +58,7 @@ export default function NavBar() {
                         </Menu>
                     </IconButton>
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1}}>
-                        <Link href='/'>Deiussum's Pattern Maker</Link>
+                        <Link href='/'>Deiussum&apos;s Pattern Maker</Link>
                     </Typography>
                     <Button color="inherit">Login</Button>
                 </Toolbar>

@@ -1,0 +1,18 @@
+[
+    {
+        "title": "Create",
+        "description": "Create new mosaic patterns from scratch."
+    },
+    {
+        "title": "Import image",
+        "description": "Import any image.  You can resize the image and the app will convert the image to 2 colors black and white, allowing you to adjust the threshold."
+    },
+    {
+        "title": "Export",
+        "description": "Export your design to a PDF that includes the chart and a written pattern."
+    },
+    {
+        "title": "Custom instructions",
+        "description": "Create a PDF of instructions for your pattern using your favorite editor and include that at the beginning of the exported pattern."
+    }
+]
