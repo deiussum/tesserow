@@ -97,7 +97,9 @@ class Dialogs {
             data.data.push(newRow);
 
             for(let col=0; col<data.width; col++) {
-                const color = Jimp.intToRGBA(image.getPixelColor(col, row)).r;
+                const rgba = Jimp.intToRGBA(image.getPixelColor(col, row));
+                const inverseAlpha = 1.0 - (rgba.a / 255.0);
+                const color = rgba.r + ((255 - rgba.r) * inverseAlpha);
                 newRow.push(color);
             }
         }
