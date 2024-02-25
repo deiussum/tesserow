@@ -13,6 +13,9 @@ import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
+import HelpButton from './HelpButton';
+import ContrastHelp from './Help/ContrastHelp';
+import ImportSizeHelp from './Help/ImportSizeHelp';
 
 interface ImagePreviewDialogProps {
     data?: any;
@@ -56,6 +59,7 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
             }
         }
     };
+
 
     const thresholdChange = (e:Event, value:number) => {
         setThreshold(value)
@@ -103,6 +107,7 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
     }, [threshold]);
 
     return (
+        <>
         <Dialog open={props.open} onClose={props.handleClose} fullScreen>
             <DialogTitle>Image Preview</DialogTitle>
             <Box component="form" onSubmit={importClicked}>
@@ -116,14 +121,12 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                                 <Divider />
                             </Box>
                             <Box my={1}>
-                                <DialogContentText>
-                                    Your image has been adjusted to be pure black and white.  You can adjust the threshold slider to adjust the 
-                                    point at which a pixel is converted to black and white in order to get the best looking image.  If your image
-                                    already was only black and white with nothing in between, this slider will have no effect unless you slide it
-                                    all the way to one end or the other.
-                                </DialogContentText>
-                            </Box>
-                            <Box my={1}>
+                                <span>
+                                    <h4>
+                                        Threshold
+                                        <HelpButton><ContrastHelp /></HelpButton>
+                                    </h4>
+                                </span>
                                 <span>Current Threshold: {threshold}</span>
                                 <Slider defaultValue={128} onChange={thresholdChange} min={0} max={255} step={1} />
                             </Box>
@@ -131,13 +134,12 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                                 <Divider />
                             </Box>
                             <Box my={1}>
-                                <DialogContentText>
-                                    If your image was larger than 300px, it has been resized to fit within a 300x300 px area.  Going larger than
-                                    this is not recommended.  You can adjust the size here and it will resize when you click import.  If you want
-                                    to preview the image at that size before the import, you can click on the "Apply" button to update the preview.
-                                </DialogContentText>
-                            </Box>
-                            <Box my={1}>
+                                <span>
+                                    <h4>
+                                        Image Size
+                                        <HelpButton><ImportSizeHelp /></HelpButton>
+                                    </h4>
+                                </span>
                                 <TextField label="Width" name="width" value={inputs.width} type="number" onChange={setSize} required={true} />
                                 <TextField label="Height" name="height" value={inputs.height} type="number" onChange={setSize} required={true} />
                                 <Button onClick={resizeClicked} >Apply</Button>
@@ -180,6 +182,7 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                 </DialogActions>
             </Box>
         </Dialog>
+        </>
     );
 }
 

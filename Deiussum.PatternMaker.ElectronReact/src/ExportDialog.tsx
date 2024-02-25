@@ -13,6 +13,8 @@ import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberIn
 import TextField from '@mui/material/TextField';
 import ExportOptions from './ExportOptions';
 import FileSelector from './FileSelector';
+import HelpButton from './HelpButton';
+import ExportDialogHelp from './Help/ExportDialogHelp';
 
 
 interface ExportDialogProps {
@@ -27,12 +29,6 @@ const ExportDialog = (props: ExportDialogProps) => {
     const [ inputs, setInputs ] = useState(defaultInput);
     const [ exportPickerError, setExportPickerError ] = useState(false);
     const [ additionalPdfPickerError, setAdditionalPdfPickerError ] = useState(false);
-    // const [ additionalPdfVisibility, setAdditionalPdfVisibility ] = useState('collapse');
-
-    // useEffect(() => {
-    //     setAdditionalPdfVisibility(inputs.additionalPdfChecked ? 'visible' : 'collapse');
-
-    // }, [ inputs.additionalPdfChecked ])
 
     const setInput = (e:React.ChangeEvent<any>) => {
         setInputs({ ...inputs, [e.target.name]: e.target.value});
@@ -75,7 +71,12 @@ const ExportDialog = (props: ExportDialogProps) => {
             <DialogTitle>Export Options</DialogTitle>
             <Box component='form' onSubmit={exportClicked}>
                 <DialogContent>
-                    <DialogContentText>Select options for exporting.</DialogContentText>
+                    <DialogContentText>
+                        <h4>
+                            Select options for exporting.
+                            <HelpButton><ExportDialogHelp/></HelpButton>
+                        </h4>
+                    </DialogContentText>
                     <div>
                         <FormControlLabel label='Include additional PDF instructions' control={
                             <Checkbox name='additionalPdfChecked' checked={inputs.additionalPdfChecked} onChange={setBooleanInput} />
@@ -86,31 +87,30 @@ const ExportDialog = (props: ExportDialogProps) => {
                             value={inputs.additionalPdfFileName} 
                             disabled={!inputs.additionalPdfChecked}
                             required={inputs.additionalPdfChecked}
-                            visible={inputs.additionalPdfChecked}
                             error={additionalPdfPickerError}
                             onChange={additionalPdfChanged} />
                     </Box>
-                    <div>
+                    <Box component='div' my={2}>
+                        <TextField label='Page start' name='pageStart' type='number' value={inputs.pageStart} onChange={setInput} />
+                    </Box>
+                    <Box>
                         <FormControlLabel label='Include chart' control={
                             <Checkbox name='includeChart' checked={inputs.includeChart} onChange={setBooleanInput} />
                         } />
-                    </div>
-                    <div>
+                    </Box>
+                    <Box>
                         <FormControlLabel label='Include written pattern' control={
                             <Checkbox name='includeWrittenPattern' checked={inputs.includeWrittenPattern} onChange={setBooleanInput} />
                         } />
-                    </div>
-                    <div>
-                        <TextField label='Page start' name='pageStart' type='number' value={inputs.pageStart} onChange={setInput} />
-                    </div>
-                    <div>
+                    </Box>
+                    <Box>
                         <FileSelector label='Export file name' name='exportFileName' 
                             value={inputs.exportFileName} 
                             save={true}
                             onChange={exportFileChanged} 
                             error={exportPickerError}
                             required={true} />
-                    </div>
+                    </Box>
                 </DialogContent>
                 <DialogActions>
                     <ButtonGroup variant='contained'>

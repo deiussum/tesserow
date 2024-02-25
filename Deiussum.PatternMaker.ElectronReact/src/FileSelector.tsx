@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FolderIcon from '@mui/icons-material/FolderOpen';
+import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 
 interface FileSelectorProps {
@@ -28,12 +29,10 @@ const FileSelector = (props: FileSelectorProps) => {
             props.onChange(response.result);
         }
     }
-    
-    const visibility = props.visible === false ? 'collapse' : 'visible';
 
     return (
-     <Box my={2} visibility={visibility}>
-        <span>
+     <Grid container spacing={2}>
+        <Grid xs={11}>
             <TextField label={props.label} 
                 name={props.name} 
                 value={fileName} 
@@ -44,11 +43,13 @@ const FileSelector = (props: FileSelectorProps) => {
                 required={props.required}
                 error={props.error}
             />
+        </Grid>
+        <Grid xs={1}>
             <Button variant='outlined' 
                 onClick={selectFile} 
                 disabled={props.disabled}><FolderIcon /></Button>
-        </span>
-     </Box>   
+        </Grid>
+     </Grid>   
     );
 }
 
