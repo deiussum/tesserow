@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Deiussum.PatternMaker is a mosaic crochet pattern generator, made up of three independent, separately-run sub-projects in one repo (no shared package manager workspace, no shared build):
 
-- **`Deiussum.PatternMaker.ElectronReact/`** — the main desktop application (Electron + React + TypeScript). This is where nearly all product functionality lives and is the primary area of active development.
+- **`Deiussum.PatternMaker.ElectronReact/`** — the main desktop application (Tauri + React + TypeScript; directory name kept for history, migrated off Electron). This is where nearly all product functionality lives and is the primary area of active development.
 - **`Deiussum.PatternMaker.WebApi/`** — a .NET 8 Web API, currently a stub (only the default `WeatherForecastController` template exists). Intended eventually for license verification and serving data to the marketing site.
 - **`Deiussum.PatternMaker.WebNext/`** — a Next.js 14 (App Router) marketing/info site (download links, registration, news), using MUI and NextAuth.
 
@@ -15,12 +15,14 @@ There is no top-level build script tying these together; each sub-project is bui
 ## Commands
 
 ### ElectronReact (main app)
+Despite the directory name (kept for history), this is now a Tauri app, not Electron — see "ElectronReact architecture" below. Building it requires a Rust toolchain (`cargo`) in addition to Node, plus WebKitGTK dev headers on Linux.
+
 Run from `Deiussum.PatternMaker.ElectronReact/`:
-- `npm install` — install dependencies (repo also has a `yarn.lock`, but `package-lock.json`/npm is the documented flow in the README)
-- `npm start` — runs `electron-forge start` (dev mode with webpack + hot reload)
+- `npm install` — install dependencies (`package-lock.json`/npm is the flow; there is no `yarn.lock`)
+- `npm start` — runs `tauri dev` (Vite dev server + a Tauri window, with Vite HMR)
 - `npm run lint` — ESLint over `.ts`/`.tsx` files
-- `npm run package` — package the app without creating installers (`electron-forge package`)
-- `npm run make` — build platform installers (`electron-forge make`)
+- `npm run package` — build the app binary without bundling installers (`tauri build --no-bundle`)
+- `npm run make` — build platform installers (`tauri build`, via `cross-env NO_STRIP=true` — the `linuxdeploy` tool used for AppImage bundling ships a `strip` too old for some systems' newer ELF sections, so stripping is skipped)
 
 There is no test suite configured for this project.
 
@@ -37,21 +39,21 @@ Run from `Deiussum.PatternMaker.WebNext/`:
 
 ## ElectronReact architecture
 
-This is a standard Electron Forge + Webpack + TypeScript app with a strict main/renderer split; all filesystem, dialog, image-processing, and PDF work happens in the main process and is exposed to the renderer only through a narrow `contextBridge` API.
+This is a Tauri + Vite + React + TypeScript app (migrated off Electron Forge/Webpack — see the `migrate-electron-to-tauri`/`spike-tauri-shell-port` OpenSpec change history under `openspec/changes/archive/` for why and how). Almost none of the app's own logic runs in the Rust host process: `src-tauri/` registers only Tauri's official `dialog` and `fs` plugins (no custom Rust commands), and all the business logic that used to live in Electron's main process — native dialogs, image import, PDF export — now runs in the webview/renderer, calling those plugins directly.
 
-- **`src/index.ts`** — Electron main process entry point. Creates the `BrowserWindow` and registers all `ipcMain.handle` channels (`getFileName`, `save`, `open`, `import`, `export`, `resize`). All of these simply delegate to `dialogs.ts`.
-- **`src/preload.ts`** — the only bridge between main and renderer. Exposes a `window.dialogs` object via `contextBridge.exposeInMainWorld`, mirroring the IPC channels above. The renderer code accesses these as `(window as any).dialogs.*` (see `app.tsx`).
-- **`src/dialogs.ts`** — all main-process business logic: native open/save dialogs, JSON save/load of a mosaic project, image import via Jimp (greyscale + downscale to a 300px threshold, converted into a 2D array of luminance values for thresholding), and PDF export via `pdfkit`/`pdf-merger-js` (draws the chart grid, written pattern text, page numbers, and optionally merges in a user-supplied cover PDF).
-- **`src/renderer.ts`** — renderer process entry, loads `app.tsx`.
+- **`src-tauri/`** — the Rust host (Cargo project). `src/lib.rs` registers `tauri-plugin-dialog` and `tauri-plugin-fs`. `capabilities/default.json` grants the actual permissions used — note that Tauri scopes byte-level commands (`read_file`/`write_file`) and text-level commands (`read_text_file`/`write_text_file`) as *separate* permissions even though the app treats them as the same kind of file access; both need their own grant. `tauri.conf.json` holds `productName`/`version`/window config and bundler targets.
+- **`vite.config.ts`** (+ the root `index.html`) — frontend dev/build tooling, replacing the old webpack configs. Includes `vite-plugin-node-polyfills`, needed because `blob-stream` (used for PDF export) expects Node's `stream`/`util` modules.
+- **`src/renderer.ts`** — renderer entry point. Imports `dialogs-bridge.ts` (installing `window.dialogs`) before rendering `app.tsx`.
+- **`src/dialogs-bridge.ts`** — replaces the old `dialogs.ts` + `preload.ts` pair. Installs `window.dialogs` (`getFileName`, `save`, `open`, `import`, `resize`, `export`) directly via `@tauri-apps/plugin-dialog`/`@tauri-apps/plugin-fs`, so the rest of the renderer code is unchanged from the Electron version. Image import still uses Jimp (browser build) for greyscale + downscale-to-300px + luminance-array conversion. PDF export uses `pdfkit`'s standalone (browser-safe) build — the default Node build reads its fonts via `fs`, which doesn't exist in a webview — piped through `blob-stream` into an in-memory buffer, then written via the `fs` plugin. Merging in a user-supplied cover PDF is done with direct `pdf-lib` page-copying rather than `pdf-merger-js`, which imports `fs/promises` at module load and can't run in a webview at all.
 - **`src/app.tsx`** — top-level React component and application state machine. Owns which top-level screen is shown (`HomePage`, `NewMosaicForm`, `MosaicEditor`, `ImagePreviewDialog`) via boolean `useState` flags rather than a router. It also owns the image-import → threshold → mosaic-generation pipeline: import image via `dialogs.import`, preview/resize via `ImagePreviewDialog`, then paint `mosaic` cells based on a luminance threshold.
-- **`src/Mosaic.ts`** — the core domain model, independent of React/Electron. Exports a singleton `mosaic: Mosaic` instance (not a class you instantiate yourself — most other code imports and mutates this singleton directly).
+- **`src/Mosaic.ts`** — the core domain model, independent of React/Tauri. Exports a singleton `mosaic: Mosaic` instance (not a class you instantiate yourself — most other code imports and mutates this singleton directly).
   - `Mosaic` — owns the `<canvas id="mosaic-canvas">` element, zoom/scale, and mouse event wiring (hover highlight, click-to-toggle).
   - `MosaicChart` — the width/height grid of `MosaicRow`s. Handles coordinate math, save/load (de)serialization, generating the printable PDF page layout (`getChartPageData`), and generating the written (text) pattern (`getWrittenPattern(s)`).
   - `MosaicRow` — alternates a base color per row and renders the written-pattern stitch-run-length text for that row (`SC`/`DC`/`JS`/`ES` codes).
   - `MosaicCell` — a single stitch. `color` is 0/1 (crochet's two mosaic colors), `type` encodes stitch kind (0=single crochet, 1=double crochet forming the "X" motif, 2/3=join/end stitch markers on row edges). `canToggleColor`/`toggleColor` enforce the mosaic-crochet construction rules (edge cells and cells that would break the alternating-row pattern can't be toggled), and toggling a cell also flips the stitch type of the cell above it (the "double stitch" square that visually connects two rows).
   - **Row/column numbering is inverted from array indices**: `rowNumber`/`columnNumber` count down from `height`/`width`, while `rows[]`/`cells[]` are indexed 0-based from the top/right. Coordinate helpers (`getCellByChartRowAndCol` vs `getCellByRowAndCol`) exist for both numbering systems — check which one a given caller expects before adding new lookups.
 - Editor UI components (`MosaicEditor.tsx`, `NewMosaicForm.tsx`, `ExportDialog.tsx`, `ExportOptions.tsx`, `ImagePreviewDialog.tsx`, `WrittenPatternDialog.tsx`, `HelpDialog.tsx`/`HelpButton.tsx`, `StatusBar.tsx`, `FileSelector.tsx`) are mostly presentational MUI-based dialogs/panels that read/mutate the `mosaic` singleton and call into `window.dialogs` for file I/O; they hold little state of their own.
-- Save files are plain JSON (`MosaicChart.getSaveData()`/`loadData()`); PDF export options are shaped by `ExportOptions.ts` and consumed both by the renderer (`ExportDialog.tsx`) and main process (`dialogs.ts#export`).
+- Save files are plain JSON (`MosaicChart.getSaveData()`/`loadData()`); PDF export options are shaped by `ExportOptions.tsx` and consumed both by `ExportDialog.tsx` and `dialogs-bridge.ts#exportPdf`.
 
 ## WebNext architecture
 

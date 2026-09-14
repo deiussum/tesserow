@@ -3,13 +3,14 @@
   "productName": "deiussumpattern",
   "version": "1.0.0",
   "description": "Deiussum's Pattern Maker",
-  "main": ".webpack/main",
   "scripts": {
-    "start": "electron-forge start -- --no-sandbox",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "start": "tauri dev",
+    "package": "tauri build --no-bundle",
+    "make": "cross-env NO_STRIP=true tauri build",
+    "lint": "eslint --ext .ts,.tsx .",
+    "vite:dev": "vite",
+    "vite:build": "vite build",
+    "tauri": "tauri"
   },
   "keywords": [],
   "author": {
@@ -18,30 +19,20 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@electron-forge/cli": "^6.4.2",
-    "@electron-forge/maker-deb": "^6.4.2",
-    "@electron-forge/maker-rpm": "^6.4.2",
-    "@electron-forge/maker-squirrel": "^6.4.2",
-    "@electron-forge/maker-zip": "^6.4.2",
-    "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
-    "@electron-forge/plugin-webpack": "^6.4.2",
+    "@tauri-apps/cli": "^2.11.4",
     "@types/node": "^20.10.1",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "@vercel/webpack-asset-relocator-loader": "1.7.3",
-    "css-loader": "^6.0.0",
-    "electron": "27.0.4",
+    "@vitejs/plugin-react": "^6.1.1",
+    "cross-env": "^10.1.0",
     "eslint": "^8.0.1",
     "eslint-plugin-import": "^2.25.0",
-    "fork-ts-checker-webpack-plugin": "^7.2.13",
-    "node-loader": "^2.0.0",
-    "style-loader": "^3.0.0",
-    "ts-loader": "^9.2.2",
     "ts-node": "^10.0.0",
     "typescript": "~4.5.4",
-    "url-loader": "^4.1.1"
+    "vite": "^8.3.0",
+    "vite-plugin-node-polyfills": "^0.28.0"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -49,19 +40,17 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.14.18",
     "@mui/material": "^5.14.18",
+    "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-dialog": "^2.7.3",
+    "@tauri-apps/plugin-fs": "^2.5.2",
     "@types/pdfkit": "^0.13.2",
     "@types/uuid": "^9.0.7",
-    "electron-squirrel-startup": "^1.0.0",
+    "blob-stream": "^0.1.3",
     "jimp": "^0.5.6",
-    "pdf-merger-js": "^5.0.0",
+    "pdf-lib": "^1.17.1",
     "pdfkit": "^0.14.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "uuid": "^9.0.1"
-  },
-  "allowScripts": {
-    "core-js@2.6.12": true,
-    "electron@27.0.4": true,
-    "electron-winstaller@5.2.1": true
   }
 }
