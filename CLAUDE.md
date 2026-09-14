@@ -4,13 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Deiussum.PatternMaker is a mosaic crochet pattern generator, made up of three independent, separately-run sub-projects in one repo (no shared package manager workspace, no shared build):
+Deiussum.PatternMaker is a mosaic crochet pattern generator. The repo contains a single active sub-project:
 
-- **`Deiussum.PatternMaker.ElectronReact/`** — the main desktop application (Tauri + React + TypeScript; directory name kept for history, migrated off Electron). This is where nearly all product functionality lives and is the primary area of active development.
-- **`Deiussum.PatternMaker.WebApi/`** — a .NET 8 Web API, currently a stub (only the default `WeatherForecastController` template exists). Intended eventually for license verification and serving data to the marketing site.
-- **`Deiussum.PatternMaker.WebNext/`** — a Next.js 14 (App Router) marketing/info site (download links, registration, news), using MUI and NextAuth.
-
-There is no top-level build script tying these together; each sub-project is built/run from its own directory.
+- **`Deiussum.PatternMaker.ElectronReact/`** — the main desktop application (Tauri + React + TypeScript; directory name kept for history, migrated off Electron). This is where all product functionality lives.
 
 ## Commands
 
@@ -25,17 +21,6 @@ Run from `Deiussum.PatternMaker.ElectronReact/`:
 - `npm run make` — build platform installers (`tauri build`, via `cross-env NO_STRIP=true` — the `linuxdeploy` tool used for AppImage bundling ships a `strip` too old for some systems' newer ELF sections, so stripping is skipped)
 
 There is no test suite configured for this project.
-
-### WebApi
-Run from `Deiussum.PatternMaker.WebApi/`:
-- `dotnet run` — starts the API (also buildable via the `Deiussum.PatternMaker.sln` solution at the repo root, which currently only references this project)
-
-### WebNext
-Run from `Deiussum.PatternMaker.WebNext/`:
-- `npm install`
-- `npm run dev` — start the Next dev server (README says `npm start`, but `start` runs the production server — use `dev` for local development)
-- `npm run build` — production build
-- `npm run lint` — `next lint`
 
 ## ElectronReact architecture
 
@@ -55,17 +40,9 @@ This is a Tauri + Vite + React + TypeScript app (migrated off Electron Forge/Web
 - Editor UI components (`MosaicEditor.tsx`, `NewMosaicForm.tsx`, `ExportDialog.tsx`, `ExportOptions.tsx`, `ImagePreviewDialog.tsx`, `WrittenPatternDialog.tsx`, `HelpDialog.tsx`/`HelpButton.tsx`, `StatusBar.tsx`, `FileSelector.tsx`) are mostly presentational MUI-based dialogs/panels that read/mutate the `mosaic` singleton and call into `window.dialogs` for file I/O; they hold little state of their own.
 - Save files are plain JSON (`MosaicChart.getSaveData()`/`loadData()`); PDF export options are shaped by `ExportOptions.tsx` and consumed both by `ExportDialog.tsx` and `dialogs-bridge.ts#exportPdf`.
 
-## WebNext architecture
-
-Next.js App Router structure under `src/app/`: `page.tsx` (home), `Features/`, `News/`, `Register/`, and `Help/` are route segments, each with its own `page.tsx`. `Features/Cards.json` and `News/newsItems.json` are static content data read by their respective pages rather than being hardcoded in JSX. Auth is handled via NextAuth at `src/app/api/auth/[...nextauth]`. Styling uses Tailwind (`tailwind.config.ts`) alongside MUI components, and `src/components/navbar.tsx` is the shared nav shown across routes via `layout.tsx`.
-
-## WebApi architecture
-
-Minimal ASP.NET Core Web API (`Program.cs` + `Controllers/`). Currently only the scaffolded `WeatherForecastController` exists — there is no real endpoint implementation yet, so don't assume any licensing/data endpoints exist until they're added.
-
 ## OpenSpec (spec-driven workflow)
 
-This repo uses [OpenSpec](https://github.com/Fission-AI/OpenSpec) (the `opsx` experimental workflow) to plan and track non-trivial changes as specs before they're implemented, spanning all three sub-projects.
+This repo uses [OpenSpec](https://github.com/Fission-AI/OpenSpec) (the `opsx` experimental workflow) to plan and track non-trivial changes as specs before they're implemented.
 
 - **`openspec/config.yaml`** — workflow config (schema, optional project context/rules).
 - **`openspec/specs/`** — the current, agreed-upon behavior ("what is true now"), organized by capability.
