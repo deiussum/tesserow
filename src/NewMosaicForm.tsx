@@ -63,7 +63,7 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
             <Box component='form' onSubmit={createClicked} >
                 <DialogContent>
                     <DialogContentText>Set the height & width of your new mosaic.</DialogContentText>
-                    <Box my={1}>
+                    <Box sx={{ my: 1 }}>
                         <TextField name="width" 
                             type="number" 
                             label="Width" 
@@ -79,10 +79,10 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
                             required={true}
                             error={errors.height}/>
                     </Box>
-                    <Box my={2}>
+                    <Box sx={{ my: 2 }}>
                         <Divider />
                     </Box>
-                    <Box my={1}>
+                    <Box sx={{ my: 1 }}>
                         <DialogContentText>
                             Check this box and set a number of rows if you want to include extra starting rows of the same color.
                         </DialogContentText>
@@ -91,7 +91,7 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
                                                                 checked={inputs.extraRowsChecked} 
                                                                 onChange={setBooleanInput}/>}/>
                     </Box>
-                    <Box my={1}>
+                    <Box sx={{ my: 1 }}>
                         <TextField label="Extra rows" 
                                     name="extraRows" 
                                     value={inputs.extraRows} 

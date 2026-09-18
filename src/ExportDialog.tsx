@@ -9,7 +9,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Unstable_NumberInput as NumberInput } from '@mui/base/Unstable_NumberInput';
 import TextField from '@mui/material/TextField';
 import ExportOptions from './ExportOptions';
 import FileSelector from './FileSelector';
@@ -90,7 +89,7 @@ const ExportDialog = (props: ExportDialogProps) => {
                             error={additionalPdfPickerError}
                             onChange={additionalPdfChanged} />
                     </Box>
-                    <Box component='div' my={2}>
+                    <Box component='div' sx={{ my: 2 }}>
                         <TextField label='Page start' name='pageStart' type='number' value={inputs.pageStart} onChange={setInput} />
                     </Box>
                     <Box>

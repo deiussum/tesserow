@@ -10,7 +10,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 import HelpButton from './HelpButton';
@@ -116,11 +116,11 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                         Adjust the properties image before importing.
                     </DialogContentText>
                     <Grid container spacing={2}>
-                        <Grid xs={6}>
-                            <Box my={2}>
+                        <Grid size={{ xs: 6 }}>
+                            <Box sx={{ my: 2 }}>
                                 <Divider />
                             </Box>
-                            <Box my={1}>
+                            <Box sx={{ my: 1 }}>
                                 <span>
                                     <h4>
                                         Threshold
@@ -130,10 +130,10 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                                 <span>Current Threshold: {threshold}</span>
                                 <Slider defaultValue={128} onChange={thresholdChange} min={0} max={255} step={1} />
                             </Box>
-                            <Box my={2}>
+                            <Box sx={{ my: 2 }}>
                                 <Divider />
                             </Box>
-                            <Box my={1}>
+                            <Box sx={{ my: 1 }}>
                                 <span>
                                     <h4>
                                         Image Size
@@ -144,10 +144,10 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                                 <TextField label="Height" name="height" value={inputs.height} type="number" onChange={setSize} required={true} />
                                 <Button onClick={resizeClicked} >Apply</Button>
                             </Box>
-                            <Box my={2}>
+                            <Box sx={{ my: 2 }}>
                                 <Divider />
                             </Box>
-                            <Box my={1}>
+                            <Box sx={{ my: 1 }}>
                                 <DialogContentText>
                                     If you want your pattern to include a number of border rows, click the checkbox here and set the number of rows
                                     you want to use.  This will set that many rows on the top and bottom to the first color.
@@ -157,7 +157,7 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                                                                     checked={inputs.extraRowsChecked} 
                                                                     onChange={setBooleanInput}/>}/>
                             </Box>
-                            <Box my={1}>
+                            <Box sx={{ my: 1 }}>
                                 <TextField label="Extra rows" 
                                         name="extraRows" 
                                         value={inputs.extraRows} 
@@ -167,8 +167,8 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                                         required={inputs.extraRowsChecked}/>
                             </Box>
                         </Grid>
-                        <Grid xs={6}>
-                            <Box mx={2}>
+                        <Grid size={{ xs: 6 }}>
+                            <Box sx={{ mx: 2 }}>
                                 <canvas ref={canvasRef} style={thresholdCanvasStyle}></canvas>
                             </Box>
                         </Grid>

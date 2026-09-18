@@ -4,12 +4,12 @@
  */
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile, readFile, writeFile } from '@tauri-apps/plugin-fs';
-import Jimp from 'jimp';
-// pdfkit's default (Node) entry reads its base-14 font metrics via `fs`, which
-// doesn't exist in the webview. The standalone build embeds fonts and browser
-// shims for stream/fs/zlib instead - see design.md's PDF export decision.
-// @ts-ignore - no type declarations ship for the standalone entry point
-import PDFDocument from 'pdfkit/js/pdfkit.standalone';
+import { Jimp } from 'jimp';
+import { intToRGBA } from '@jimp/utils';
+// pdfkit's package exports map now resolves the bare specifier to a browser
+// build (fs/zlib/stream shimmed, fonts embedded) whenever the "node" export
+// condition isn't set, so no standalone subpath import is needed anymore.
+import PDFDocument from 'pdfkit';
 import blobStream from 'blob-stream';
 import { PDFDocument as PdfLibDocument } from 'pdf-lib';
 import ExportOptions from './ExportOptions';
@@ -64,7 +64,7 @@ function getImageData(image: any, filePath: string) {
         data.data.push(newRow);
 
         for (let col = 0; col < data.width; col++) {
-            const rgba = Jimp.intToRGBA(image.getPixelColor(col, row));
+            const rgba = intToRGBA(image.getPixelColor(col, row));
             const inverseAlpha = 1.0 - rgba.a / 255.0;
             const color = rgba.r + (255 - rgba.r) * inverseAlpha;
             newRow.push(color);
@@ -89,7 +89,7 @@ async function importImage() {
     if (w > imageThreshold || h > imageThreshold) {
         const newWidth = w > h ? imageThreshold : (imageThreshold * w) / h;
         const newHeight = h > w ? imageThreshold : (imageThreshold * h) / w;
-        image.resize(newWidth, newHeight);
+        image.resize({ w: newWidth, h: newHeight });
     }
 
     return getImageData(image, filePath as string);
@@ -97,7 +97,7 @@ async function importImage() {
 
 async function resize(filePath: string, width: number, height: number) {
     const image = await loadJimpImage(filePath);
-    image.resize(width, height);
+    image.resize({ w: width, h: height });
     return getImageData(image, filePath);
 }
 

@@ -3,7 +3,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 
 const ContrastHelp = () => {
     return (
-        <Box my={1}>
+        <Box sx={{ my: 1 }}>
             <DialogContentText>
                 Your image has been adjusted to be pure black and white.  You can adjust the threshold slider to adjust the 
                 point at which a pixel is converted to black and white in order to get the best looking image.  If your image
