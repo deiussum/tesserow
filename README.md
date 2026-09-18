@@ -1,4 +1,4 @@
-# Deiussum.PatternMaker
+# Tesserow
 
 Mosaic Pattern Maker for Crocheting
 
@@ -6,12 +6,11 @@ Mosaic Pattern Maker for Crocheting
 
 This project is a work in progress.  The goal is to create a tool that will allow you to create a mosaic pattern for crocheting.  The tool will allow you to import an image.  It will then generate a pattern that you can use to crochet the image.
 
-## Deiussum.PatternMaker.ElectronReact
+## Running the app
 
-This is the main desktop application.  It is written using Electron and React.  
+This is a Tauri + React desktop application. Building it requires a Rust toolchain (`cargo`) in addition to Node, plus WebKitGTK dev headers on Linux.
 
 To run this:
 
-- From a console, change to the `Deiussum.PatternMaker.ElectronReact` directory
-- Run `npm install` to install all of the dependencies.  
+- Run `npm install` to install all of the dependencies.
 - Run `npm start` to run the application.

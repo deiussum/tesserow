@@ -4,16 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Deiussum.PatternMaker is a mosaic crochet pattern generator. The repo contains a single active sub-project:
-
-- **`Deiussum.PatternMaker.ElectronReact/`** — the main desktop application (Tauri + React + TypeScript; directory name kept for history, migrated off Electron). This is where all product functionality lives.
+Tesserow is a mosaic crochet pattern generator. It's a single Tauri + React + TypeScript desktop application living at the repo root.
 
 ## Commands
 
-### ElectronReact (main app)
-Despite the directory name (kept for history), this is now a Tauri app, not Electron — see "ElectronReact architecture" below. Building it requires a Rust toolchain (`cargo`) in addition to Node, plus WebKitGTK dev headers on Linux.
+Despite some lingering internal naming (see "Application architecture" below), this is a Tauri app, not Electron. Building it requires a Rust toolchain (`cargo`) in addition to Node, plus WebKitGTK dev headers on Linux.
 
-Run from `Deiussum.PatternMaker.ElectronReact/`:
+Run from the repo root:
 - `npm install` — install dependencies (`package-lock.json`/npm is the flow; there is no `yarn.lock`)
 - `npm start` — runs `tauri dev` (Vite dev server + a Tauri window, with Vite HMR)
 - `npm run lint` — ESLint over `.ts`/`.tsx` files
@@ -22,7 +19,7 @@ Run from `Deiussum.PatternMaker.ElectronReact/`:
 
 There is no test suite configured for this project.
 
-## ElectronReact architecture
+## Application architecture
 
 This is a Tauri + Vite + React + TypeScript app (migrated off Electron Forge/Webpack — see the `migrate-electron-to-tauri`/`spike-tauri-shell-port` OpenSpec change history under `openspec/changes/archive/` for why and how). Almost none of the app's own logic runs in the Rust host process: `src-tauri/` registers only Tauri's official `dialog` and `fs` plugins (no custom Rust commands), and all the business logic that used to live in Electron's main process — native dialogs, image import, PDF export — now runs in the webview/renderer, calling those plugins directly.
 

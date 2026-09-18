@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "deiussumpattern",
+  "productName": "Tesserow",
   "version": "0.1.0",
-  "identifier": "com.deiussum.patternmaker",
+  "identifier": "com.deiussum.tesserow",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Deiussum's Pattern Maker",
+        "title": "Tesserow",
         "width": 800,
         "height": 600,
         "resizable": true,

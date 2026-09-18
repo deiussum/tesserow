@@ -1,8 +1,8 @@
 {
-  "name": "deiussumpattern",
-  "productName": "deiussumpattern",
+  "name": "tesserow",
+  "productName": "Tesserow",
   "version": "1.0.0",
-  "description": "Deiussum's Pattern Maker",
+  "description": "Mosaic crochet pattern generator",
   "scripts": {
     "start": "tauri dev",
     "package": "tauri build --no-bundle",
