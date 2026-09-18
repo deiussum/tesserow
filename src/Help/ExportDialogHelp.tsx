@@ -3,7 +3,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 
 const ExportDialogHelp = () => {
     return (
-        <Box my={1}>
+        <Box sx={{ my: 1 }}>
             <DialogContentText>
                 <h3>Additional PDF</h3>
                 <p>

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FolderIcon from '@mui/icons-material/FolderOpen';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 
 interface FileSelectorProps {
@@ -32,24 +32,23 @@ const FileSelector = (props: FileSelectorProps) => {
 
     return (
      <Grid container spacing={2}>
-        <Grid xs={11}>
-            <TextField label={props.label} 
-                name={props.name} 
-                value={fileName} 
-                inputProps={{readOnly: true}}
-                InputLabelProps={{shrink: true}} 
+        <Grid size={{ xs: 11 }}>
+            <TextField label={props.label}
+                name={props.name}
+                value={fileName}
+                slotProps={{ htmlInput: { readOnly: true }, inputLabel: { shrink: true } }}
                 size={'medium'}
                 fullWidth={true}
                 required={props.required}
                 error={props.error}
             />
         </Grid>
-        <Grid xs={1}>
-            <Button variant='outlined' 
-                onClick={selectFile} 
+        <Grid size={{ xs: 1 }}>
+            <Button variant='outlined'
+                onClick={selectFile}
                 disabled={props.disabled}><FolderIcon /></Button>
         </Grid>
-     </Grid>   
+     </Grid>
     );
 }
 
