@@ -25,12 +25,14 @@
 
 ## 5. Commit and push local changes
 
-- [ ] 5.1 Commit the flatten + rebrand + doc changes (still pushing to the existing `origin` URL, which continues to work until the Forgejo-side rename happens) and push; verify with `git log`/`git status` that the push succeeded and the working tree is clean
+- [x] 5.1 Commit the flatten + rebrand + doc changes (still pushing to the existing `origin` URL, which continues to work until the Forgejo-side rename happens) and push; verify with `git log`/`git status` that the push succeeded and the working tree is clean
+  - Committed as `a8fad18`; pushed to `origin/main` after the Forgejo rename (user renamed the repo before the push step, so this landed on the new URL directly — see 6.1/6.2)
 
 ## 6. Rename the Forgejo repository (manual, server-side)
 
-- [ ] 6.1 Rename the repository on Forgejo from `Deiussum.PatternMaker` to `tesserow` (done manually by the user via the Forgejo UI)
-- [ ] 6.2 Run `git remote set-url origin <new-forgejo-url>` locally and verify with `git fetch` that the remote resolves correctly
+- [x] 6.1 Rename the repository on Forgejo from `Deiussum.PatternMaker` to `tesserow` (done manually by the user via the Forgejo UI)
+- [x] 6.2 Run `git remote set-url origin <new-forgejo-url>` locally and verify with `git fetch` that the remote resolves correctly
+  - New URL: `ssh://forgejo@git.deiussum.com:2222/deiussum/tesserow.git`; `git fetch origin` succeeded
 
 ## Blocker note (task 4.2)
 
