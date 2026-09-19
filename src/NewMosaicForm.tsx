@@ -37,14 +37,14 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
         extraRows: false
     });
 
-    const setInput = (e:React.ChangeEvent<any>) => {
+    const setInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         setInputs({ ...inputs, [e.target.name]: e.target.value});
 
         const error = !e.target.value;
         setErrors({ ...errors, [e.target.name]: error});
     }
 
-    const setBooleanInput = (e:React.ChangeEvent<any>) => {
+    const setBooleanInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.checked;
         setInputs({ ...inputs, [e.target.name]: value});
     }

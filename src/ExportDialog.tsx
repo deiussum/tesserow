@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
@@ -29,11 +29,11 @@ const ExportDialog = (props: ExportDialogProps) => {
     const [ exportPickerError, setExportPickerError ] = useState(false);
     const [ additionalPdfPickerError, setAdditionalPdfPickerError ] = useState(false);
 
-    const setInput = (e:React.ChangeEvent<any>) => {
+    const setInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         setInputs({ ...inputs, [e.target.name]: e.target.value});
     }
 
-    const setBooleanInput = (e:React.ChangeEvent<any>) => {
+    const setBooleanInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.checked;
         setInputs({ ...inputs, [e.target.name]: value});
     }

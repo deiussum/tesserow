@@ -5,6 +5,7 @@ import NewMosaicForm from './NewMosaicForm';
 import MosaicEditor from './MosaicEditor';
 import ImagePreviewDialog from './ImagePreviewDialog';
 import mosaic from './Mosaic';
+import type { ImageImportSuccess } from './dialogs-bridge';
 
 
 const App = () => {
@@ -12,8 +13,7 @@ const App = () => {
     const [ newMosaicFormShown, setNewMosaicFormShown ] = useState(false);
     const [ mosaicEditorShown, setMosaicEditorShown ] = useState(false);
     const [ previewShown, setPreviewShown ] = useState(false);
-    const [ previewImageData, setPreviewImageData ] = useState(null);
-    const [ statusText, setStatusText ] = useState('Ready');
+    const [ previewImageData, setPreviewImageData ] = useState<ImageImportSuccess>(null);
 
     const newMosaicClicked = () => {
         setNewMosaicFormShown(true);
@@ -39,7 +39,7 @@ const App = () => {
     };
 
     const importImage = async () => {
-        const response = await (window as any).dialogs.import();
+        const response = await window.dialogs.import();
 
         console.log(response);
         if (!response.success) return false;
@@ -49,26 +49,26 @@ const App = () => {
         return true;
     }
 
-    const onResizePreview = async (data: any, width: number, height: number) => {
-        data = await (window as any).dialogs.resize(data.filePath, width, height);
+    const onResizePreview = async (data: ImageImportSuccess, width: number, height: number) => {
+        data = await window.dialogs.resize(data.filePath, width, height);
         setPreviewImageData(data);
     }
 
-    const imagePreviewComplete = async (threshold: number, data: any, newWidth: number, newHeight: number, extraRows: number) => {
+    const imagePreviewComplete = async (threshold: number, data: ImageImportSuccess, newWidth: number, newHeight: number, extraRows: number) => {
         if (newWidth != data.width || newHeight != newHeight) {
-            data = await (window as any).dialogs.resize(data.filePath, newWidth, newHeight);
+            data = await window.dialogs.resize(data.filePath, newWidth, newHeight);
         }
 
         mosaic.initialize(data.width, data.height, extraRows);
 
         for(let row=data.height - 1; row > 0; row--) {
             for (let col = data.width - 1; col > 0; col--) {
-                var color = data.data[row][col];
-                var cell = mosaic.data.getCellByRowAndCol(row + extraRows, col);
+                const color = data.data[row][col];
+                const cell = mosaic.data.getCellByRowAndCol(row + extraRows, col);
 
                 if (!cell) continue;
 
-                var cellColor = color > threshold ? 0 : 1;
+                const cellColor = color > threshold ? 0 : 1;
                 if (cellColor != cell.color) cell.toggleColor();
             }
         }
@@ -85,7 +85,7 @@ const App = () => {
     }
 
     const loadFile = async() => {
-        const response = await (window as any).dialogs.open();
+        const response = await window.dialogs.open();
 
         console.log(response);
         if (!response.success) return false;

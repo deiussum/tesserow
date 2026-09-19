@@ -1,5 +1,4 @@
-import { useState, useRef } from 'react';
-import Box from '@mui/material/Box';
+import { useState } from 'react';
 import Button from '@mui/material/Button';
 import FolderIcon from '@mui/icons-material/FolderOpen';
 import Grid from '@mui/material/Grid';
@@ -23,7 +22,7 @@ const FileSelector = (props: FileSelectorProps) => {
 
     const selectFile = async () => {
         const filters = [{ extensions: ['pdf'],  name: 'PDF files'}];
-        const response = await (window as any).dialogs.getFileName(filters, props.save);
+        const response = await window.dialogs.getFileName(filters, props.save);
         if (response.success === true) {
             setFileName(response.result);
             props.onChange(response.result);
