@@ -16,4 +16,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
+  // pdfkit's standalone browser bundle references the global `Buffer`, which
+  // vite-plugin-node-polyfills supplies via an esbuild inject - but that inject
+  // only fires during the optimizer's real build pass, one phase after Vite's
+  // initial dependency scan. Declaring it here upfront avoids the mid-session
+  // re-optimize + full-reload that otherwise races in-flight chunk requests
+  // (e.g. the @mui/icons-material shared createSvgIcon chunk) on a cold start.
+  optimizeDeps: {
+    include: ['vite-plugin-node-polyfills/shims/buffer'],
+  },
 });
