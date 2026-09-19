@@ -8,7 +8,7 @@ interface StatusBarProps {
 
 const style = {
     width: '100%',
-    position: 'fixed' as 'fixed',
+    position: 'fixed' as const,
     bottom: 0,
     backgroundColor: '#05405c',
     height: '30px'

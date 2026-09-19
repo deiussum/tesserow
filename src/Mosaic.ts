@@ -1,9 +1,36 @@
+export interface MosaicCellSaveData {
+    columnNumber: number;
+    color: number;
+    type: number;
+}
+
+export interface MosaicRowSaveData {
+    rowNumber: number;
+    cellCount: number;
+    cells: MosaicCellSaveData[];
+}
+
+export interface MosaicChartSaveData {
+    width: number;
+    height: number;
+    extraRows: number;
+    rows: MosaicRowSaveData[];
+}
+
+export interface ChartPageData {
+    rowStartNumber: number;
+    rowEndNumber: number;
+    colStartNumber: number;
+    colEndNumber: number;
+    pageCells: (MosaicCell | null)[][];
+}
+
 class Mosaic {
     defaultScale: number = 15;
     scale: number = 15;
-    canvas: any = null;
+    canvas: HTMLCanvasElement = null;
     data: MosaicChart = null;
-    hovering: any = null;
+    hovering: MosaicCell = null;
     #eventListenersSet: boolean = false;
 
     initialize = (width: number, height: number, extraRows: number) => {
@@ -12,13 +39,13 @@ class Mosaic {
         if (extraRows > 0) this.data.addExtraRows(extraRows);
     }
 
-    load = (data:any) => {
+    load = (data: MosaicChartSaveData) => {
         this.initialize(data.width, data.height, 0);
         this.data.loadData(data);
     }
 
     setupCanvas = () => {
-        this.canvas = document.getElementById('mosaic-canvas');
+        this.canvas = document.getElementById('mosaic-canvas') as HTMLCanvasElement;
 
         this.canvas.width = (this.data.width * this.scale) + (this.scale * 2);
         this.canvas.height = (this.data.height * this.scale) + (this.scale * 2);
@@ -35,7 +62,7 @@ class Mosaic {
 
     #setupEventListeners() {
         if (this.#eventListenersSet) return;
-        const mouseMove = (e: any) => {
+        const mouseMove = (e: MouseEvent) => {
             const canvasX = e.offsetX;
             const canvasY = e.offsetY;
             const hoverCell = this.data.getCellByCoords(canvasX, canvasY);
@@ -53,7 +80,7 @@ class Mosaic {
         };
         this.canvas.addEventListener('mousemove', mouseMove);
 
-        const canvasClicked = (e: any) => {
+        const canvasClicked = (e: MouseEvent) => {
             const canvasX = e.offsetX;
             const canvasY = e.offsetY;
             const clickedCell = this.data.getCellByCoords(canvasX, canvasY);
@@ -140,10 +167,10 @@ class MosaicChart {
     }
 
     getCellRangeByRowAnddCol(rowStartIndex: number, rowEndIndex: number, colStartIndex: number, colEndIndex: number) {
-        let rows = [];
+        const rows: (MosaicCell | null)[][] = [];
 
         for(let rowIndex=rowStartIndex; rowIndex<=rowEndIndex; rowIndex++) {
-            const cells: any =[];
+            const cells: (MosaicCell | null)[] = [];
             rows.push(cells);
 
             for(let colIndex=colStartIndex; colIndex<=colEndIndex; colIndex++) {
@@ -166,7 +193,7 @@ class MosaicChart {
     }
 
     getWrittenPatternLines(column1Length = 16, totalWidth = 80) {
-        let pattern = [];
+        const pattern = [];
         for (let rowIndex = this.height - 1; rowIndex >=0; rowIndex--) {
             const row = this.rows[rowIndex];
 
@@ -175,20 +202,20 @@ class MosaicChart {
         return pattern;
     }
 
-    getChartPageData(colsPerPage = 43, rowsPerPage = 55) {
-        let results = [];
-        var colPages = Math.ceil(this.width / colsPerPage);
-        var rowPages = Math.ceil(this.height / rowsPerPage);
+    getChartPageData(colsPerPage = 43, rowsPerPage = 55): ChartPageData[] {
+        const results: ChartPageData[] = [];
+        const colPages = Math.ceil(this.width / colsPerPage);
+        const rowPages = Math.ceil(this.height / rowsPerPage);
 
         for(let rowPage=0; rowPage<rowPages; rowPage++) {
-            let rowStart = rowPage * rowsPerPage;
-            let rowEnd = Math.min(rowStart + rowsPerPage - 1, this.height);
+            const rowStart = rowPage * rowsPerPage;
+            const rowEnd = Math.min(rowStart + rowsPerPage - 1, this.height);
 
             for(let colPage=0; colPage<colPages; colPage++) {
-                var colStart = colPage * colsPerPage;
-                var colEnd = Math.min(colStart + colsPerPage - 1, this.width);
+                const colStart = colPage * colsPerPage;
+                const colEnd = Math.min(colStart + colsPerPage - 1, this.width);
 
-                var page = {
+                const page = {
                     rowStartNumber: this.height - rowStart,
                     rowEndNumber: Math.max(this.height - rowEnd, 1),
                     colStartNumber: this.width - colStart,
@@ -212,7 +239,7 @@ class MosaicChart {
         };
     }
 
-    loadData(data:any) {
+    loadData(data: MosaicChartSaveData) {
         this.width = data.width;
         this.height = data.height;
         this.extraRows = data.extraRows;
@@ -248,10 +275,10 @@ class MosaicRow {
     }
 
     getWrittenPattern(column1Length: number = 16, totalWidth: number = 80) {
-        let patternLines = [];
+        const patternLines = [];
         let pattern = `Row ${this.rowNumber} Color${this.colorLabel()}`;
 
-        let spaceCount = column1Length - pattern.length;
+        const spaceCount = column1Length - pattern.length;
 
         pattern+= ' '.repeat(spaceCount);
 
@@ -303,7 +330,7 @@ class MosaicRow {
         };
     }
 
-    loadData(data: any) {
+    loadData(data: MosaicRowSaveData) {
         this.rowNumber = data.rowNumber;
         this.cellCount = data.cellCount;
 
@@ -331,7 +358,7 @@ class MosaicCell {
         this.type = 0;
     }
 
-    draw(ctx: any) {
+    draw(ctx: CanvasRenderingContext2D | null) {
         const x = this.getX();
         const y = this.getY();
 
@@ -355,7 +382,7 @@ class MosaicCell {
         }
     }
 
-    highlight(ctx: any) {
+    highlight(ctx: CanvasRenderingContext2D) {
         ctx.strokeStyle = "red";
         ctx.strokeRect(this.getX(), this.getY(), mosaic.scale, mosaic.scale);
     }
@@ -410,7 +437,7 @@ class MosaicCell {
         this.draw(ctx);
 
         // Get double stitch square
-        var cellAbove = this.getCellAbove();
+        const cellAbove = this.getCellAbove();
         if (cellAbove != null) {
             cellAbove.type = (cellAbove.type + 1) % 2;
             cellAbove.draw(ctx);
@@ -436,7 +463,7 @@ class MosaicCell {
         };
     }
 
-    loadData(data:any) {
+    loadData(data: MosaicCellSaveData) {
         this.columnNumber = data.columnNumber;
         this.color = data.color;
         this.type = data.type;

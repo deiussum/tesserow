@@ -16,13 +16,14 @@ import Slider from '@mui/material/Slider';
 import HelpButton from './HelpButton';
 import ContrastHelp from './Help/ContrastHelp';
 import ImportSizeHelp from './Help/ImportSizeHelp';
+import type { ImageImportSuccess } from './dialogs-bridge';
 
 interface ImagePreviewDialogProps {
-    data?: any;
+    data?: ImageImportSuccess;
     open: boolean;
     handleClose: () => void;
-    onImagePreviewComplete?: (threshold: number, data: any, newWidth: number, newHeight: number, extraRows: number) => void;
-    onResizePreviewData?: (data: any, width: number, height: number) => void;
+    onImagePreviewComplete?: (threshold: number, data: ImageImportSuccess, newWidth: number, newHeight: number, extraRows: number) => void;
+    onResizePreviewData?: (data: ImageImportSuccess, width: number, height: number) => void;
 };
 
 const thresholdCanvasStyle = {
@@ -31,17 +32,23 @@ const thresholdCanvasStyle = {
 
 const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
     const [ threshold, setThreshold ] = useState(-1);
-    const [ inputs, setInputs ] = useState({ 
-        threshold: -1, 
-        width: props.data.width, 
-        height: props.data.height, 
-        extraRowsChecked: false, 
+    const [ inputs, setInputs ] = useState<{
+        threshold: number;
+        width: number | string;
+        height: number | string;
+        extraRowsChecked: boolean;
+        extraRows: number | string;
+    }>({
+        threshold: -1,
+        width: props.data.width,
+        height: props.data.height,
+        extraRowsChecked: false,
         extraRows: 1
     });
-    const canvasRef = useRef(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const drawImage = () => {
-        let canvas = canvasRef.current;
+        const canvas = canvasRef.current;
 
         if (!canvas || !props.open) return;
 
@@ -52,7 +59,7 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
         ctx.scale(2, 2);
         for(let row = 0; row < props.data.height; row++) {
             for (let col = 0; col < props.data.width; col++) {
-                var color = props.data.data[row][col];
+                const color = props.data.data[row][col];
 
                 ctx.fillStyle = color >= threshold ? "white" : "black";
                 ctx.fillRect(col, row, col, row);
@@ -65,19 +72,19 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
         setThreshold(value)
     }
 
-    const setSize = (e:React.ChangeEvent<any>) => {
+    const setSize = (e:React.ChangeEvent<HTMLInputElement>) => {
         const aspect = props.data.width / props.data.height;
-        const newWidth = e.target.name === "width" ? e.target.value : (e.target.value * aspect).toFixed(0);
-        const newHeight = e.target.name === "height" ? e.target.value : (e.target.value / aspect).toFixed(0);
+        const newWidth = e.target.name === "width" ? e.target.value : (Number(e.target.value) * aspect).toFixed(0);
+        const newHeight = e.target.name === "height" ? e.target.value : (Number(e.target.value) / aspect).toFixed(0);
 
         setInputs({ ...inputs, width: newWidth, height: newHeight });
     }
 
-    const setInput = (e:React.ChangeEvent<any>) => {
+    const setInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         setInputs({ ...inputs, [e.target.name]: e.target.value});
     }
 
-    const setBooleanInput = (e:React.ChangeEvent<any>) => {
+    const setBooleanInput = (e:React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.checked;
         setInputs({ ...inputs, [e.target.name]: value});
     }
@@ -89,7 +96,7 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
     }
 
     const resizeClicked = () => {
-        if (inputs.width > 0 && inputs.height > 0) {
+        if (Number(inputs.width) > 0 && Number(inputs.height) > 0) {
             props.onResizePreviewData(props.data, Number(inputs.width), Number(inputs.height));
         }
     }

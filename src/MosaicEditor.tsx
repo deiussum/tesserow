@@ -19,7 +19,7 @@ const MosaicEditor = (props: MosaicEditorProps) => {
     const [ zoomLevel, setZoomLevel ] = useState(1.0);
     const [ zoomString, setZoomString ] = useState('Zoom: 100%');
     const [ statusText, setStatusText ] = useState('Ready');
-    const [ middleText, setMiddleStatusText ] = useState('');
+    const [ middleText ] = useState('');
 
     useEffect(() => {
         mosaic.setupCanvas();
@@ -53,14 +53,14 @@ const MosaicEditor = (props: MosaicEditorProps) => {
             chartPages: mosaic.data.getChartPageData(),
             writtenPatternLines: mosaic.data.getWrittenPatternLines(16, 65)
         };
-        await (window as any).dialogs.export(data, options);
+        await window.dialogs.export(data, options);
         setStatusText('Exported');
     }
 
     const saveClicked = async() => {
         setStatusText('Saving...');
         const data = mosaic.data.getSaveData();
-        await (window as any).dialogs.save(data);
+        await window.dialogs.save(data);
         setStatusText('Saved');
     }
 

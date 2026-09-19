@@ -2,7 +2,7 @@
  * Installs window.dialogs, backed by Tauri's dialog/fs plugins. Consumed by
  * app.tsx, MosaicEditor.tsx, and FileSelector.tsx.
  */
-import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
+import { open as openDialog, save as saveDialog, type DialogFilter } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile, readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { Jimp } from 'jimp';
 import { intToRGBA } from '@jimp/utils';
@@ -13,12 +13,73 @@ import PDFDocument from 'pdfkit';
 import blobStream from 'blob-stream';
 import { PDFDocument as PdfLibDocument } from 'pdf-lib';
 import ExportOptions from './ExportOptions';
+import type { MosaicChartSaveData, ChartPageData } from './Mosaic';
 
-function toTauriFilters(filters: any[]) {
-    return (filters || []).map((f: any) => ({ name: f.name, extensions: f.extensions }));
+export interface DialogFileNameSuccess {
+    success: true;
+    result: string;
+}
+export interface DialogFileNameFailure {
+    success: false;
+    error: string;
+}
+export type DialogFileNameResult = DialogFileNameSuccess | DialogFileNameFailure;
+
+export interface DialogActionResult {
+    success: boolean;
+    error?: string;
 }
 
-async function getFileName(filters: any, save: boolean) {
+export interface DialogOpenSuccess {
+    success: true;
+    data: MosaicChartSaveData;
+}
+export interface DialogOpenFailure {
+    success: false;
+    error: string;
+}
+export type DialogOpenResult = DialogOpenSuccess | DialogOpenFailure;
+
+export interface ImageImportSuccess {
+    success: true;
+    filePath: string;
+    width: number;
+    height: number;
+    data: number[][];
+}
+export interface ImageImportFailure {
+    success: false;
+    error: string;
+}
+export type ImageImportResult = ImageImportSuccess | ImageImportFailure;
+
+type JimpImage = Awaited<ReturnType<typeof Jimp.read>>;
+
+export interface ExportData {
+    chartPages: ChartPageData[];
+    writtenPatternLines: string[];
+}
+
+export interface DialogsApi {
+    getFileName: (filters: DialogFilter[], save: boolean) => Promise<DialogFileNameResult>;
+    save: (data: MosaicChartSaveData) => Promise<DialogActionResult>;
+    open: () => Promise<DialogOpenResult>;
+    import: () => Promise<ImageImportResult>;
+    resize: (filePath: string, width: number, height: number) => Promise<ImageImportSuccess>;
+    export: (data: ExportData, options: ExportOptions) => Promise<DialogActionResult>;
+}
+
+declare global {
+    interface Window {
+        dialogs: DialogsApi;
+    }
+}
+
+function toTauriFilters(filters: DialogFilter[]) {
+    return (filters || []).map((f) => ({ name: f.name, extensions: f.extensions }));
+}
+
+async function getFileName(filters: DialogFilter[], save: boolean): Promise<DialogFileNameResult> {
     const tauriFilters = toTauriFilters(filters);
     const result = save
         ? await saveDialog({ filters: tauriFilters })
@@ -28,7 +89,7 @@ async function getFileName(filters: any, save: boolean) {
     return { success: true, result };
 }
 
-async function save(data: any) {
+async function save(data: MosaicChartSaveData): Promise<DialogActionResult> {
     const filePath = await saveDialog({ filters: [{ extensions: ['json'], name: 'JSON Files' }] });
     if (!filePath) return { success: false, error: 'Save cancelled' };
 
@@ -36,7 +97,7 @@ async function save(data: any) {
     return { success: true };
 }
 
-async function open() {
+async function open(): Promise<DialogOpenResult> {
     const filePath = await openDialog({ filters: [{ extensions: ['json'], name: 'JSON Files' }], multiple: false });
     if (!filePath) return { success: false, error: 'Open cancelled' };
 
@@ -44,14 +105,14 @@ async function open() {
     return { success: true, data: JSON.parse(text) };
 }
 
-async function loadJimpImage(filePath: string) {
+async function loadJimpImage(filePath: string): Promise<JimpImage> {
     const bytes = await readFile(filePath);
     return await Jimp.read(Buffer.from(bytes));
 }
 
-function getImageData(image: any, filePath: string) {
+function getImageData(image: JimpImage, filePath: string): ImageImportSuccess {
     image.greyscale();
-    const data: any = {
+    const data: ImageImportSuccess = {
         success: true,
         filePath,
         width: image.bitmap.width,
@@ -60,7 +121,7 @@ function getImageData(image: any, filePath: string) {
     };
 
     for (let row = 0; row < data.height; row++) {
-        const newRow: any = [];
+        const newRow: number[] = [];
         data.data.push(newRow);
 
         for (let col = 0; col < data.width; col++) {
@@ -74,7 +135,7 @@ function getImageData(image: any, filePath: string) {
     return data;
 }
 
-async function importImage() {
+async function importImage(): Promise<ImageImportResult> {
     const filePath = await openDialog({
         filters: [{ extensions: ['png', 'jpeg', 'jpg', 'gif'], name: 'Image Files' }],
         multiple: false,
@@ -95,13 +156,13 @@ async function importImage() {
     return getImageData(image, filePath as string);
 }
 
-async function resize(filePath: string, width: number, height: number) {
+async function resize(filePath: string, width: number, height: number): Promise<ImageImportSuccess> {
     const image = await loadJimpImage(filePath);
     image.resize({ w: width, h: height });
     return getImageData(image, filePath);
 }
 
-function drawChartPage(doc: any, page: any) {
+function drawChartPage(doc: PDFKit.PDFDocument, page: ChartPageData) {
     const squareSize = 12;
     for (let rowIndex = 0; rowIndex < page.pageCells.length; rowIndex++) {
         const row = page.pageCells[rowIndex];
@@ -149,7 +210,7 @@ function drawChartPage(doc: any, page: any) {
     doc.addPage();
 }
 
-function addPdfFooter(doc: any, pageNumber: number, totalPages: number) {
+function addPdfFooter(doc: PDFKit.PDFDocument, pageNumber: number, totalPages: number) {
     const bottom = doc.page.margins.bottom;
     doc.page.margins.bottom = 0;
     doc.fillColor('black')
@@ -159,7 +220,7 @@ function addPdfFooter(doc: any, pageNumber: number, totalPages: number) {
     doc.page.margins.bottom = bottom;
 }
 
-function addPdfFooterToAllPages(doc: any, startPage: number) {
+function addPdfFooterToAllPages(doc: PDFKit.PDFDocument, startPage: number) {
     const pages = doc.bufferedPageRange();
     for (let i = 0; i < pages.count; i++) {
         doc.switchToPage(i);
@@ -167,7 +228,7 @@ function addPdfFooterToAllPages(doc: any, startPage: number) {
     }
 }
 
-async function renderPdfBytes(data: any, options: ExportOptions): Promise<Uint8Array> {
+async function renderPdfBytes(data: ExportData, options: ExportOptions): Promise<Uint8Array> {
     const doc = new PDFDocument({ bufferPages: true });
     const stream = doc.pipe(blobStream());
 
@@ -194,7 +255,7 @@ async function renderPdfBytes(data: any, options: ExportOptions): Promise<Uint8A
     return new Uint8Array(await blob.arrayBuffer());
 }
 
-async function exportPdf(data: any, options: ExportOptions) {
+async function exportPdf(data: ExportData, options: ExportOptions): Promise<DialogActionResult> {
     const generatedBytes = await renderPdfBytes(data, options);
 
     if (!options.additionalPdfChecked) {
@@ -220,7 +281,7 @@ async function exportPdf(data: any, options: ExportOptions) {
     return { success: true };
 }
 
-(window as any).dialogs = {
+window.dialogs = {
     getFileName,
     save,
     open,
