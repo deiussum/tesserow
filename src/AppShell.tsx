@@ -20,11 +20,10 @@ interface AppShellProps {
     toggleWrittenPatternClicked?: () => void;
     exportClicked?: () => void;
     saveClicked?: () => void;
-    zoomInClicked?: () => void;
-    zoomOutClicked?: () => void;
     closeClicked?: () => void;
     rightPanelOpen?: boolean;
     rightPanelContent?: ReactNode;
+    statusBar?: ReactNode;
     children?: ReactNode;
 }
 
@@ -37,8 +36,6 @@ const AppShell = (props: AppShellProps) => {
                         <>
                             <Button onClick={props.exportClicked}>Export to PDF</Button>
                             <Button onClick={props.saveClicked}>Save</Button>
-                            <Button onClick={props.zoomInClicked}>Zoom In</Button>
-                            <Button onClick={props.zoomOutClicked}>Zoom Out</Button>
                             <Button onClick={props.closeClicked}>Close</Button>
                         </>
                     ) : (
@@ -84,6 +81,11 @@ const AppShell = (props: AppShellProps) => {
                     </IconButton>
                 ) : null}
             </div>
+            {props.mosaicOpen && props.statusBar ? (
+                <div className={styles.statusBarRow}>
+                    {props.statusBar}
+                </div>
+            ) : null}
         </div>
     );
 }

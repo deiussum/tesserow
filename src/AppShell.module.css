@@ -17,3 +17,8 @@
     min-width: 0;
     overflow: auto;
 }
+
+.statusBarRow {
+    flex-shrink: 0;
+    width: 100%;
+}
