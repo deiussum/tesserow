@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
@@ -15,6 +15,9 @@ import StatusBar from './StatusBar';
 import mosaic from './Mosaic';
 import type { ImageImportSuccess } from './dialogs-bridge';
 
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 4.0;
+const ZOOM_STEP = 0.1;
 
 const App = () => {
     const [ homePageShown, setHomePageShown ] = useState(true);
@@ -155,17 +158,49 @@ const App = () => {
         setZoomString(`Zoom: ${(zoom * 100).toFixed(0)}%`);
     }
 
+    const setZoom = (next: number) => {
+        const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next));
+        setZoomLevel(clamped);
+        setZoomStringFromZoom(clamped);
+    }
+
     const zoomInClicked = () => {
-        const newZoom = zoomLevel + 0.1;
-        setZoomLevel(newZoom);
-        setZoomStringFromZoom(newZoom);
+        setZoom(zoomLevel + ZOOM_STEP);
     }
 
     const zoomOutClicked = () => {
-        const newZoom = zoomLevel - 0.1;
-        setZoomLevel(newZoom);
-        setZoomStringFromZoom(newZoom);
+        setZoom(zoomLevel - ZOOM_STEP);
     }
+
+    const zoomResetClicked = () => {
+        setZoom(1.0);
+    }
+
+    const zoomPresetSelected = (zoom: number) => {
+        setZoom(zoom);
+    }
+
+    useEffect(() => {
+        if (!mosaicEditorShown) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!(e.ctrlKey || e.metaKey)) return;
+
+            if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                zoomInClicked();
+            } else if (e.key === '-') {
+                e.preventDefault();
+                zoomOutClicked();
+            } else if (e.key === '0') {
+                e.preventDefault();
+                zoomResetClicked();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [mosaicEditorShown, zoomLevel]);
 
     return (
         <ThemeProvider theme={theme}>
@@ -178,18 +213,23 @@ const App = () => {
                 toggleWrittenPatternClicked={toggleWrittenPatternClicked}
                 exportClicked={exportClicked}
                 saveClicked={saveClicked}
-                zoomInClicked={zoomInClicked}
-                zoomOutClicked={zoomOutClicked}
                 closeClicked={mosaicClosedClicked}
                 rightPanelOpen={mosaicEditorShown && patternPanelOpen}
                 rightPanelContent={<WrittenPatternDialog />}
+                statusBar={
+                    <StatusBar
+                        leftText={statusText}
+                        rightText={zoomString}
+                        onZoomIn={zoomInClicked}
+                        onZoomOut={zoomOutClicked}
+                        onZoomReset={zoomResetClicked}
+                        onZoomPresetSelected={zoomPresetSelected}
+                    />
+                }
             >
                 {homePageShown ? <HomePage /> : null}
                 {mosaicEditorShown ? (
-                    <>
-                        <MosaicEditor zoomLevel={zoomLevel} />
-                        <StatusBar leftText={statusText} rightText={zoomString} />
-                    </>
+                    <MosaicEditor zoomLevel={zoomLevel} onZoomChange={setZoom} />
                 ) : null}
             </AppShell>
             <NewMosaicForm open={newMosaicFormShown} newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} />
