@@ -1,22 +1,11 @@
-import { useState } from 'react';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import Typography from '@mui/material/Typography';
 import mosaic from './Mosaic';
 import style from './WrittenPatternDialog.module.css';
 
-interface WrittenPatternDialogProps {
-    open: boolean,
-    dialogClosed?: () => void
-}
-
-const WrittenPatternDialog = (props: WrittenPatternDialogProps) => {
-
-    const [ writtenPattern ] = useState(mosaic.data ? mosaic.data.getWrittenPattern() : null);
+const WrittenPatternDialog = () => {
+    const writtenPattern = mosaic.data ? mosaic.data.getWrittenPattern() : null;
 
     const copyWrittenPattern = () => {
         const patternText = document.getElementById('written-pattern-text');
@@ -29,21 +18,14 @@ const WrittenPatternDialog = (props: WrittenPatternDialogProps) => {
     }
 
     return (
-        <Dialog open={props.open}>
-            <DialogTitle>Written Pattern</DialogTitle>
-            <DialogContent>
-                <DialogContentText>Below is the written pattern.  You can click the Copy button to copy it to the clipboard.</DialogContentText>
-                <div className={style.writtenPatternText}>
-                    {writtenPattern}
-                </div>
-            </DialogContent>
-            <DialogActions>
-                <ButtonGroup variant='contained'>
-                    <Button onClick={props.dialogClosed}>Close</Button>
-                    <Button onClick={copyWrittenPattern}>Copy</Button>
-                </ButtonGroup>
-            </DialogActions>
-        </Dialog>
+        <Box className={style.panel}>
+            <Typography variant='h6'>Written Pattern</Typography>
+            <Typography variant='body2'>Below is the written pattern. You can click the Copy button to copy it to the clipboard.</Typography>
+            <div id='written-pattern-text' className={style.writtenPatternText}>
+                {writtenPattern}
+            </div>
+            <Button variant='contained' onClick={copyWrittenPattern}>Copy</Button>
+        </Box>
     );
 }
 

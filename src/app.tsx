@@ -1,9 +1,17 @@
 import { createRoot } from 'react-dom/client';
 import { useState } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme';
+import AppShell from './AppShell';
 import HomePage from './HomePage';
 import NewMosaicForm from './NewMosaicForm';
 import MosaicEditor from './MosaicEditor';
 import ImagePreviewDialog from './ImagePreviewDialog';
+import ExportDialog from './ExportDialog';
+import ExportOptions from './ExportOptions';
+import WrittenPatternDialog from './WrittenPatternDialog';
+import StatusBar from './StatusBar';
 import mosaic from './Mosaic';
 import type { ImageImportSuccess } from './dialogs-bridge';
 
@@ -14,6 +22,12 @@ const App = () => {
     const [ mosaicEditorShown, setMosaicEditorShown ] = useState(false);
     const [ previewShown, setPreviewShown ] = useState(false);
     const [ previewImageData, setPreviewImageData ] = useState<ImageImportSuccess>(null);
+
+    const [ exportDialogShown, setExportDialogShown ] = useState(false);
+    const [ patternPanelOpen, setPatternPanelOpen ] = useState(false);
+    const [ zoomLevel, setZoomLevel ] = useState(1.0);
+    const [ zoomString, setZoomString ] = useState('Zoom: 100%');
+    const [ statusText, setStatusText ] = useState('Ready');
 
     const newMosaicClicked = () => {
         setNewMosaicFormShown(true);
@@ -36,6 +50,15 @@ const App = () => {
     const mosaicClosedClicked = () => {
         setMosaicEditorShown(false);
         setHomePageShown(true);
+
+        // Reset editor session state so the next mosaic opened starts fresh,
+        // matching the old behavior where this state lived locally in
+        // MosaicEditor and was naturally reset by unmount/remount.
+        setZoomLevel(1.0);
+        setZoomString('Zoom: 100%');
+        setStatusText('Ready');
+        setPatternPanelOpen(false);
+        setExportDialogShown(false);
     };
 
     const importImage = async () => {
@@ -98,20 +121,88 @@ const App = () => {
         setPreviewShown(false);
     }
 
+    const toggleWrittenPatternClicked = () => {
+        setPatternPanelOpen(!patternPanelOpen);
+    }
+
+    const exportCanceled = () => {
+        setExportDialogShown(false);
+    }
+
+    const exportClicked = () => {
+        setExportDialogShown(true);
+    }
+
+    const exportConfirmed = async (options: ExportOptions) => {
+        setExportDialogShown(false);
+        setStatusText('Exporting...');
+        const data = {
+            chartPages: mosaic.data.getChartPageData(),
+            writtenPatternLines: mosaic.data.getWrittenPatternLines(16, 65)
+        };
+        await window.dialogs.export(data, options);
+        setStatusText('Exported');
+    }
+
+    const saveClicked = async () => {
+        setStatusText('Saving...');
+        const data = mosaic.data.getSaveData();
+        await window.dialogs.save(data);
+        setStatusText('Saved');
+    }
+
+    const setZoomStringFromZoom = (zoom: number) => {
+        setZoomString(`Zoom: ${(zoom * 100).toFixed(0)}%`);
+    }
+
+    const zoomInClicked = () => {
+        const newZoom = zoomLevel + 0.1;
+        setZoomLevel(newZoom);
+        setZoomStringFromZoom(newZoom);
+    }
+
+    const zoomOutClicked = () => {
+        const newZoom = zoomLevel - 0.1;
+        setZoomLevel(newZoom);
+        setZoomStringFromZoom(newZoom);
+    }
+
     return (
-        <>
-            {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} loadMosaicClicked={loadMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <AppShell
+                mosaicOpen={mosaicEditorShown}
+                newMosaicClicked={newMosaicClicked}
+                loadMosaicClicked={loadMosaicClicked}
+                importImageClicked={importMosaicClicked}
+                toggleWrittenPatternClicked={toggleWrittenPatternClicked}
+                exportClicked={exportClicked}
+                saveClicked={saveClicked}
+                zoomInClicked={zoomInClicked}
+                zoomOutClicked={zoomOutClicked}
+                closeClicked={mosaicClosedClicked}
+                rightPanelOpen={mosaicEditorShown && patternPanelOpen}
+                rightPanelContent={<WrittenPatternDialog />}
+            >
+                {homePageShown ? <HomePage /> : null}
+                {mosaicEditorShown ? (
+                    <>
+                        <MosaicEditor zoomLevel={zoomLevel} />
+                        <StatusBar leftText={statusText} rightText={zoomString} />
+                    </>
+                ) : null}
+            </AppShell>
             <NewMosaicForm open={newMosaicFormShown} newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} />
-            {mosaicEditorShown ? <MosaicEditor closeClicked={mosaicClosedClicked} /> : null }
-            {previewShown 
-            ? <ImagePreviewDialog open={previewShown} 
-                               data={previewImageData} 
-                               handleClose={handlePreviewClose} 
-                               onImagePreviewComplete={imagePreviewComplete} 
-                               onResizePreviewData={onResizePreview}/> 
+            <ExportDialog open={exportDialogShown} dialogClosed={exportCanceled} exportClicked={exportConfirmed} />
+            {previewShown
+            ? <ImagePreviewDialog open={previewShown}
+                               data={previewImageData}
+                               handleClose={handlePreviewClose}
+                               onImagePreviewComplete={imagePreviewComplete}
+                               onResizePreviewData={onResizePreview}/>
             : null }
 
-        </>
+        </ThemeProvider>
     );
 }
 

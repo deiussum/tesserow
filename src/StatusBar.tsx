@@ -1,4 +1,4 @@
-
+import Box from '@mui/material/Box';
 
 interface StatusBarProps {
     leftText?: string
@@ -6,18 +6,18 @@ interface StatusBarProps {
     rightText?: string
 }
 
-const style = {
-    width: '100%',
-    position: 'fixed' as const,
-    bottom: 0,
-    backgroundColor: '#05405c',
-    height: '30px'
-}
-
 const StatusBar = (props: StatusBarProps) => {
 
     return (
-        <div style={style}>
+        <Box
+            sx={{
+                width: '100%',
+                position: 'fixed',
+                bottom: 0,
+                backgroundColor: 'background.paper',
+                height: '30px',
+            }}
+        >
             <span style={{float: 'left', paddingLeft: '1em'}}>
                 {props.leftText}
             </span>
@@ -27,7 +27,7 @@ const StatusBar = (props: StatusBarProps) => {
             <span style={{float: 'right', paddingRight: '1em'}}>
                 {props.rightText}
             </span>
-        </div>
+        </Box>
     );
 };
 

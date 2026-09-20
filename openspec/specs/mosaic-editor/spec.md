@@ -36,15 +36,23 @@ The system SHALL attempt to toggle a clicked cell's color, subject to the mosaic
 - **THEN** the cell's color is unchanged
 
 ### Requirement: Written pattern can be viewed and copied
-The system SHALL let the user open a dialog showing the full written (text) pattern for the current chart, and SHALL let them copy that text to the clipboard.
+The system SHALL show a persistent handle on the edge of the written-pattern panel, visible whether the panel is collapsed or expanded, that toggles the panel open or closed when clicked. While the panel is open, the system SHALL let the user copy its displayed text to the clipboard.
 
 #### Scenario: Opening the written pattern dialog
-- **WHEN** the user clicks "Show Written Pattern"
-- **THEN** a dialog opens displaying the current chart's written pattern text
+- **WHEN** the user clicks the panel's handle while the panel is collapsed
+- **THEN** the panel opens displaying the current chart's written pattern text alongside the canvas
+
+#### Scenario: Hiding the pattern panel
+- **WHEN** the user clicks the panel's handle while the panel is open
+- **THEN** the panel closes and the canvas regains the width it freed
 
 #### Scenario: Copying the pattern
-- **WHEN** the user clicks "Copy" in the written pattern dialog
+- **WHEN** the user clicks "Copy" while the pattern panel is shown
 - **THEN** the displayed pattern text is placed on the system clipboard
+
+#### Scenario: The canvas stays interactive while the panel is open
+- **WHEN** the pattern panel is open
+- **THEN** the user can still view and click cells on the canvas without closing the panel
 
 ### Requirement: Editor provides save, export, and close actions
 The system SHALL let the user save the current chart to a file, open the PDF export options, or close the editor and return to the home screen, from the editor's toolbar.

@@ -1,5 +1,14 @@
 
+.panel {
+    width: 360px;
+    height: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
 .writtenPatternText {
     white-space: pre;
     font-family: Consolas, Courier, monospace;
+    margin: 16px 0;
 }
