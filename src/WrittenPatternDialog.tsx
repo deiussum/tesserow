@@ -65,7 +65,7 @@ const WrittenPatternDialog = ({ width, onResize }: WrittenPatternDialogProps) =>
 
     return (
         <Box className={style.panel} style={{ width }}>
-            <div className={style.resizeHandle} onMouseDown={handleResizeStart} />
+            <div className={style.resizeHandle} onMouseDown={handleResizeStart} data-testid='pattern-panel-resize-handle' />
             <div className={style.header}>
                 <Typography variant='h6'>Written Pattern</Typography>
                 <Typography variant='body2'>Below is the written pattern. You can click the Copy button to copy it to the clipboard.</Typography>
