@@ -1,14 +1,40 @@
 
 .panel {
-    width: 360px;
+    position: relative;
     height: 100%;
     padding: 16px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.resizeHandle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    cursor: ew-resize;
+    z-index: 1;
+}
+
+.header {
+    flex-shrink: 0;
+}
+
+.scrollArea {
+    flex: 1;
+    min-height: 0;
     overflow: auto;
+    margin: 16px 0;
 }
 
 .writtenPatternText {
     white-space: pre;
     font-family: Consolas, Courier, monospace;
-    margin: 16px 0;
+}
+
+.footer {
+    flex-shrink: 0;
 }

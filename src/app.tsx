@@ -10,7 +10,7 @@ import MosaicEditor from './MosaicEditor';
 import ImagePreviewDialog from './ImagePreviewDialog';
 import ExportDialog from './ExportDialog';
 import ExportOptions from './ExportOptions';
-import WrittenPatternDialog from './WrittenPatternDialog';
+import WrittenPatternDialog, { PATTERN_PANEL_DEFAULT_WIDTH } from './WrittenPatternDialog';
 import StatusBar from './StatusBar';
 import mosaic from './Mosaic';
 import type { ImageImportSuccess } from './dialogs-bridge';
@@ -28,6 +28,7 @@ const App = () => {
 
     const [ exportDialogShown, setExportDialogShown ] = useState(false);
     const [ patternPanelOpen, setPatternPanelOpen ] = useState(false);
+    const [ patternPanelWidth, setPatternPanelWidth ] = useState(PATTERN_PANEL_DEFAULT_WIDTH);
     const [ zoomLevel, setZoomLevel ] = useState(1.0);
     const [ zoomString, setZoomString ] = useState('Zoom: 100%');
     const [ statusText, setStatusText ] = useState('Ready');
@@ -61,6 +62,7 @@ const App = () => {
         setZoomString('Zoom: 100%');
         setStatusText('Ready');
         setPatternPanelOpen(false);
+        setPatternPanelWidth(PATTERN_PANEL_DEFAULT_WIDTH);
         setExportDialogShown(false);
     };
 
@@ -215,7 +217,8 @@ const App = () => {
                 saveClicked={saveClicked}
                 closeClicked={mosaicClosedClicked}
                 rightPanelOpen={mosaicEditorShown && patternPanelOpen}
-                rightPanelContent={<WrittenPatternDialog />}
+                rightPanelWidth={patternPanelWidth}
+                rightPanelContent={<WrittenPatternDialog width={patternPanelWidth} onResize={setPatternPanelWidth} />}
                 statusBar={
                     <StatusBar
                         leftText={statusText}
