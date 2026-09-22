@@ -1,21 +1,4 @@
-# app-shell Specification
-
-## Purpose
-
-Defines the app's persistent shell — a top bar with contextual actions that wraps both the no-mosaic (Home) and mosaic-open (Editor) states instead of each owning separate full-screen chrome — along with the app-wide visual theme and window title it establishes.
-
-## Requirements
-
-### Requirement: A persistent shell wraps both the Home and Editor states
-The system SHALL show the same top bar across both the no-mosaic (Home) and mosaic-open (Editor) states, rather than replacing it when switching between them.
-
-#### Scenario: Opening a mosaic keeps the shell
-- **WHEN** the user creates, loads, or imports a mosaic from the no-mosaic state
-- **THEN** the same top bar remains visible as the content area switches to the editor view
-
-#### Scenario: Closing a mosaic keeps the shell
-- **WHEN** the user closes an open mosaic
-- **THEN** the same top bar remains visible as the content area switches back to the no-mosaic state
+## MODIFIED Requirements
 
 ### Requirement: Top bar actions are contextual to whether a mosaic is open
 The system SHALL present the top bar as a menu bar with File, View, and Help menus. The File menu SHALL always contain New, Open, Import Image, Save, Export to PDF, Close, and Exit. New, Open, Import Image, and Exit SHALL always be enabled, regardless of whether a mosaic is open - choosing one while a mosaic is open goes through the discard-confirmation flow rather than being blocked (see the Discarding requirement below). Save, Export to PDF, and Close SHALL be enabled only while a mosaic is open, and disabled (not removed from the menu) otherwise, since there is no current chart for them to act on. The View menu SHALL be disabled in its entirety when no mosaic is open. Zoom controls continue to live primarily in the status bar, and showing/hiding the written pattern continues to be handled primarily by the handle on the pattern panel itself (see the mosaic-editor capability); the View menu adds equivalent entry points for both without replacing them.
@@ -29,6 +12,8 @@ The system SHALL present the top bar as a menu bar with File, View, and Help men
 - **WHEN** a mosaic is currently open
 - **THEN** the File menu shows New, Open, Import Image, Save, Export to PDF, Close, and Exit all as enabled
 - **AND** the View menu is enabled
+
+## ADDED Requirements
 
 ### Requirement: File menu actions have keyboard accelerators
 The system SHALL let the user trigger New, Open, and Save via keyboard accelerators (Ctrl/Cmd+N, Ctrl/Cmd+O, Ctrl/Cmd+S respectively) in addition to selecting them from the File menu. New and Open SHALL work regardless of whether a mosaic is open (going through the same discard-confirmation flow as their menu items - see the Discarding requirement below); Save's accelerator SHALL have no effect while no mosaic is open, matching its disabled menu item.
@@ -104,17 +89,3 @@ The system SHALL provide a Help menu with an "About Tesserow" item that opens a 
 #### Scenario: Opening the About dialog
 - **WHEN** the user chooses Help > About Tesserow
 - **THEN** a dialog opens showing the application's name and version
-
-### Requirement: App-wide visual theme is consistent
-The system SHALL apply one consistent visual theme across the page background and all UI components, rather than mixing a custom page background with a UI toolkit's unrelated default theme.
-
-#### Scenario: Components match the page's visual style
-- **WHEN** any screen is displayed
-- **THEN** UI components (buttons, dialogs, panels, the top bar) render using the same color scheme as the surrounding page background, rather than an unrelated default theme
-
-### Requirement: Window title identifies the app
-The system SHALL set the application window's title to "Tesserow".
-
-#### Scenario: Launching the app
-- **WHEN** the application window opens
-- **THEN** its title reads "Tesserow"
