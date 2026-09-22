@@ -31,10 +31,16 @@ class Mosaic {
     canvas: HTMLCanvasElement = null;
     data: MosaicChart = null;
     hovering: MosaicCell = null;
-    #eventListenersSet: boolean = false;
+    isDirty: boolean = false;
+    // Tracks which canvas element currently has listeners attached, rather
+    // than a one-time boolean - MosaicEditor mounts a fresh <canvas> every
+    // time the editor opens (e.g. after Close then reopening), so listeners
+    // must be reattached to the new element instead of being skipped forever.
+    #canvasWithListeners: HTMLCanvasElement | null = null;
 
     initialize = (width: number, height: number, extraRows: number) => {
         this.data = new MosaicChart(width, height);
+        this.isDirty = false;
 
         if (extraRows > 0) this.data.addExtraRows(extraRows);
     }
@@ -61,7 +67,7 @@ class Mosaic {
     }
 
     #setupEventListeners() {
-        if (this.#eventListenersSet) return;
+        if (this.#canvasWithListeners === this.canvas) return;
         const mouseMove = (e: MouseEvent) => {
             const canvasX = e.offsetX;
             const canvasY = e.offsetY;
@@ -91,7 +97,7 @@ class Mosaic {
         };
         this.canvas.addEventListener('click', canvasClicked);
 
-        this.#eventListenersSet = true;
+        this.#canvasWithListeners = this.canvas;
     }
 }
 
@@ -430,6 +436,8 @@ class MosaicCell {
 
     toggleColor() {
         if (!this.canToggleColor()) return false;
+
+        mosaic.isDirty = true;
 
         const ctx = mosaic.canvas ? mosaic.canvas.getContext("2d") : null;
         this.color = (this.color + 1) % 2;

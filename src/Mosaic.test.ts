@@ -161,6 +161,45 @@ describe('written pattern text', () => {
     });
 });
 
+describe('unsaved-changes tracking', () => {
+    test('a successful toggle marks the chart dirty', () => {
+        mosaic.initialize(6, 6, 0);
+        const cell = mosaic.data.getCellByChartRowAndCol(3, 3);
+
+        expect(mosaic.isDirty).toBe(false);
+        expect(cell.toggleColor()).toBe(true);
+        expect(mosaic.isDirty).toBe(true);
+    });
+
+    test('a rejected toggle leaves the dirty state unchanged', () => {
+        mosaic.initialize(6, 6, 0);
+        const edgeCell = mosaic.data.rows[0].cells[2];
+
+        expect(mosaic.isDirty).toBe(false);
+        expect(edgeCell.toggleColor()).toBe(false);
+        expect(mosaic.isDirty).toBe(false);
+    });
+
+    test('initializing a chart clears the dirty state', () => {
+        mosaic.initialize(6, 6, 0);
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+        expect(mosaic.isDirty).toBe(true);
+
+        mosaic.initialize(6, 6, 0);
+        expect(mosaic.isDirty).toBe(false);
+    });
+
+    test('loading a chart clears the dirty state', () => {
+        mosaic.initialize(6, 6, 0);
+        const saveData = mosaic.data.getSaveData();
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+        expect(mosaic.isDirty).toBe(true);
+
+        mosaic.load(saveData);
+        expect(mosaic.isDirty).toBe(false);
+    });
+});
+
 describe('save/load round trip', () => {
     test('loading saved data into a fresh chart of the same size reproduces every cell', () => {
         mosaic.initialize(6, 6, 0);
