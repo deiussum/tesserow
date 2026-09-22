@@ -7,10 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import styles from './AppShell.module.css';
-
-// Keep in sync with the panel width set in WrittenPatternDialog.module.css - the
-// handle needs to know it to sit flush against the drawer's edge when it's open.
-const PATTERN_PANEL_WIDTH = 360;
+import { PATTERN_PANEL_DEFAULT_WIDTH } from './WrittenPatternDialog';
 
 interface AppShellProps {
     mosaicOpen: boolean;
@@ -22,6 +19,7 @@ interface AppShellProps {
     saveClicked?: () => void;
     closeClicked?: () => void;
     rightPanelOpen?: boolean;
+    rightPanelWidth?: number;
     rightPanelContent?: ReactNode;
     statusBar?: ReactNode;
     children?: ReactNode;
@@ -72,7 +70,7 @@ const AppShell = (props: AppShellProps) => {
                             position: 'absolute',
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            right: props.rightPanelOpen ? PATTERN_PANEL_WIDTH : 0,
+                            right: props.rightPanelOpen ? (props.rightPanelWidth ?? PATTERN_PANEL_DEFAULT_WIDTH) : 0,
                             backgroundColor: 'background.paper',
                             borderRadius: '4px 0 0 4px',
                         }}
