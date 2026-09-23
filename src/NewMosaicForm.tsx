@@ -13,6 +13,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import mosaic from './Mosaic';
 
+export const NEW_MOSAIC_DEFAULT_WIDTH = 20;
+export const NEW_MOSAIC_DEFAULT_HEIGHT = 20;
+
 interface NewMosaicFormProps {
     open: boolean,
     newMosaicCreated?: () => void;
@@ -24,9 +27,9 @@ interface NewMosaicFormProps {
 }
 
 const NewMosaicForm = (props: NewMosaicFormProps) => {
-    const [ inputs, setInputs ] = useState({ 
-        width: props.width, 
-        height: props.height,
+    const [ inputs, setInputs ] = useState({
+        width: props.width ?? NEW_MOSAIC_DEFAULT_WIDTH,
+        height: props.height ?? NEW_MOSAIC_DEFAULT_HEIGHT,
         extraRowsChecked: props.extraRowsChecked,
         extraRows: props.extraRows
     });
