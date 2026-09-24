@@ -41,11 +41,11 @@ describe('File > New discard-confirmation flow', () => {
         fireEvent.click(await screen.findByRole('menuitem', { name: /New/ }));
 
         expect(await screen.findByText('Discard unsaved changes?')).toBeInTheDocument();
-        expect(screen.queryByText('New Mosaic')).not.toBeInTheDocument();
+        expect(screen.queryByRole('heading', { name: 'New Mosaic' })).not.toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
 
-        expect(await screen.findByText('New Mosaic')).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { name: 'New Mosaic' })).toBeInTheDocument();
         await waitFor(() => expect(screen.queryByText('Discard unsaved changes?')).not.toBeInTheDocument());
     });
 
@@ -59,7 +59,7 @@ describe('File > New discard-confirmation flow', () => {
         fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
 
         await waitFor(() => expect(screen.queryByText('Discard unsaved changes?')).not.toBeInTheDocument());
-        expect(screen.queryByText('New Mosaic')).not.toBeInTheDocument();
+        expect(screen.queryByRole('heading', { name: 'New Mosaic' })).not.toBeInTheDocument();
         expect(mosaic.isDirty).toBe(true);
     });
 
@@ -71,7 +71,7 @@ describe('File > New discard-confirmation flow', () => {
         fireEvent.click(screen.getByRole('button', { name: 'File' }));
         fireEvent.click(await screen.findByRole('menuitem', { name: /New/ }));
 
-        expect(await screen.findByText('New Mosaic')).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { name: 'New Mosaic' })).toBeInTheDocument();
         expect(screen.queryByText('Discard unsaved changes?')).not.toBeInTheDocument();
     });
 
@@ -94,7 +94,7 @@ describe('File > New discard-confirmation flow', () => {
         // Not dirty, so New proceeds immediately - no discard prompt needed,
         // and critically, the item was clickable at all (regression: it used
         // to be disabled whenever a mosaic was open).
-        expect(await screen.findByText('New Mosaic')).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { name: 'New Mosaic' })).toBeInTheDocument();
         expect(screen.queryByText('Discard unsaved changes?')).not.toBeInTheDocument();
     });
 
@@ -119,7 +119,7 @@ describe('File > New discard-confirmation flow', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
 
-        expect(await screen.findByText('New Mosaic')).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { name: 'New Mosaic' })).toBeInTheDocument();
     });
 });
 

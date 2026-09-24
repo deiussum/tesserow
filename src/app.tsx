@@ -318,7 +318,13 @@ export const App = () => {
                     />
                 }
             >
-                {homePageShown ? <HomePage /> : null}
+                {homePageShown ? (
+                    <HomePage
+                        newMosaicClicked={newMosaicClicked}
+                        loadMosaicClicked={loadMosaicClicked}
+                        importImageClicked={importMosaicClicked}
+                    />
+                ) : null}
                 {mosaicEditorShown ? (
                     <MosaicEditor zoomLevel={zoomLevel} onZoomChange={setZoom} />
                 ) : null}
