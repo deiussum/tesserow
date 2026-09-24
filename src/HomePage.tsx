@@ -19,13 +19,13 @@ const HomePage = (props: HomePageProps) => {
             <Paper className={styles.startCard} elevation={4}>
                 <Stack spacing={2}>
                     <Button variant='contained' size='large' onClick={props.newMosaicClicked}>
-                        New Mosaic
+                        New Mosaic...
                     </Button>
                     <Button variant='outlined' onClick={props.loadMosaicClicked}>
                         Open...
                     </Button>
                     <Button variant='outlined' onClick={props.importImageClicked}>
-                        Import Image
+                        Import Image...
                     </Button>
                 </Stack>
             </Paper>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -106,10 +105,8 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <ButtonGroup variant='contained'>
-                        <Button onClick={props.newMosaicCancelled}>Cancel</Button>
-                        <Button type='submit'>Create</Button>
-                    </ButtonGroup>
+                    <Button onClick={props.newMosaicCancelled}>Cancel</Button>
+                    <Button variant='contained' type='submit'>Create</Button>
                 </DialogActions>
             </Box>
         </Dialog>

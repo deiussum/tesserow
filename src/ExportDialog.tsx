@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Dialog from '@mui/material/Dialog';
@@ -112,10 +111,8 @@ const ExportDialog = (props: ExportDialogProps) => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <ButtonGroup variant='contained'>
-                        <Button onClick={props.dialogClosed}>Cancel</Button>
-                        <Button type='submit'>Export</Button>
-                    </ButtonGroup>
+                    <Button onClick={props.dialogClosed}>Cancel</Button>
+                    <Button variant='contained' type='submit'>Export</Button>
                 </DialogActions>
             </Box>
         </Dialog>

@@ -1,7 +1,7 @@
 import { ReactNode, useState, MouseEvent } from 'react';
 import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
@@ -10,6 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
+import { lighten, Theme } from '@mui/material/styles';
 import CheckIcon from '@mui/icons-material/Check';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -39,6 +40,40 @@ interface AppShellProps {
 
 const shortcutTextSx = { display: 'flex', justifyContent: 'space-between', minWidth: '12em' };
 
+const MENU_BAR_HEIGHT = 30;
+
+// An open trigger and its menu share this background so they read as one
+// piece attached to the bar, rather than a menu floating below a button.
+const openMenuBackground = (theme: Theme) => lighten(theme.palette.background.paper, 0.08);
+
+const menuTriggerSx = (open: boolean) => ({
+    color: 'inherit',
+    minWidth: 0,
+    height: '100%',
+    px: 1.25,
+    borderRadius: 0,
+    ...(open ? {
+        backgroundColor: openMenuBackground,
+        '&:hover': { backgroundColor: openMenuBackground },
+    } : {}),
+});
+
+const attachedMenuProps = (align: 'left' | 'right') => ({
+    anchorOrigin: { vertical: 'bottom', horizontal: align },
+    transformOrigin: { vertical: 'top', horizontal: align },
+    slotProps: {
+        paper: {
+            sx: {
+                borderRadius: 0,
+                backgroundColor: openMenuBackground,
+                backgroundImage: 'none',
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.35)',
+            },
+        },
+        list: { sx: { py: 0.5 } },
+    },
+} as const);
+
 const AppShell = (props: AppShellProps) => {
     const [ fileMenuAnchor, setFileMenuAnchor ] = useState<HTMLElement | null>(null);
     const [ viewMenuAnchor, setViewMenuAnchor ] = useState<HTMLElement | null>(null);
@@ -63,16 +98,20 @@ const AppShell = (props: AppShellProps) => {
 
     return (
         <div className={styles.shell}>
-            <AppBar position='static' sx={{ backgroundColor: 'background.paper' }}>
-                <ButtonGroup variant='contained' aria-label='application menu bar'>
-                    <Button onClick={openFileMenu}>File</Button>
-                    <Button onClick={openViewMenu} disabled={!props.mosaicOpen}>View</Button>
-                    <Button onClick={openHelpMenu}>Help</Button>
-                </ButtonGroup>
+            {/* backgroundImage: 'none' drops MUI's dark-mode elevation overlay, which
+                would otherwise lighten the bar to the same shade as an open menu and
+                hide the open trigger's highlight. */}
+            <AppBar position='static' sx={{ backgroundColor: 'background.paper', backgroundImage: 'none' }}>
+                <Box role='group' aria-label='application menu bar' sx={{ display: 'flex', height: MENU_BAR_HEIGHT, px: 0.5 }}>
+                    <Button sx={menuTriggerSx(Boolean(fileMenuAnchor))} onClick={openFileMenu}>File</Button>
+                    <Button sx={menuTriggerSx(Boolean(viewMenuAnchor))} onClick={openViewMenu} disabled={!props.mosaicOpen}>View</Button>
+                    <Box sx={{ flexGrow: 1 }} />
+                    <Button sx={menuTriggerSx(Boolean(helpMenuAnchor))} onClick={openHelpMenu}>Help</Button>
+                </Box>
 
-                <Menu anchorEl={fileMenuAnchor} open={Boolean(fileMenuAnchor)} onClose={() => setFileMenuAnchor(null)}>
+                <Menu {...attachedMenuProps('left')} anchorEl={fileMenuAnchor} open={Boolean(fileMenuAnchor)} onClose={() => setFileMenuAnchor(null)}>
                     <MenuItem sx={shortcutTextSx} onClick={() => fileItemClicked(props.newMosaicClicked)}>
-                        <span>New</span>
+                        <span>New...</span>
                         <Typography variant='body2' color='text.secondary'>Ctrl+N</Typography>
                     </MenuItem>
                     <MenuItem sx={shortcutTextSx} onClick={() => fileItemClicked(props.loadMosaicClicked)}>
@@ -80,15 +119,15 @@ const AppShell = (props: AppShellProps) => {
                         <Typography variant='body2' color='text.secondary'>Ctrl+O</Typography>
                     </MenuItem>
                     <MenuItem onClick={() => fileItemClicked(props.importImageClicked)}>
-                        Import Image
+                        Import Image...
                     </MenuItem>
                     <Divider />
                     <MenuItem sx={shortcutTextSx} disabled={!props.mosaicOpen} onClick={() => fileItemClicked(props.saveClicked)}>
-                        <span>Save</span>
+                        <span>Save...</span>
                         <Typography variant='body2' color='text.secondary'>Ctrl+S</Typography>
                     </MenuItem>
                     <MenuItem disabled={!props.mosaicOpen} onClick={() => fileItemClicked(props.exportClicked)}>
-                        Export to PDF
+                        Export to PDF...
                     </MenuItem>
                     <MenuItem disabled={!props.mosaicOpen} onClick={() => fileItemClicked(props.closeClicked)}>
                         Close
@@ -99,7 +138,7 @@ const AppShell = (props: AppShellProps) => {
                     </MenuItem>
                 </Menu>
 
-                <Menu anchorEl={viewMenuAnchor} open={Boolean(viewMenuAnchor)} onClose={() => setViewMenuAnchor(null)}>
+                <Menu {...attachedMenuProps('left')} anchorEl={viewMenuAnchor} open={Boolean(viewMenuAnchor)} onClose={() => setViewMenuAnchor(null)}>
                     <MenuItem onClick={() => viewItemClicked(props.zoomInClicked)}>Zoom In</MenuItem>
                     <MenuItem onClick={() => viewItemClicked(props.zoomOutClicked)}>Zoom Out</MenuItem>
                     <MenuItem onClick={() => viewItemClicked(props.zoomResetClicked)}>Reset Zoom</MenuItem>
@@ -112,7 +151,7 @@ const AppShell = (props: AppShellProps) => {
                     </MenuItem>
                 </Menu>
 
-                <Menu anchorEl={helpMenuAnchor} open={Boolean(helpMenuAnchor)} onClose={() => setHelpMenuAnchor(null)}>
+                <Menu {...attachedMenuProps('right')} anchorEl={helpMenuAnchor} open={Boolean(helpMenuAnchor)} onClose={() => setHelpMenuAnchor(null)}>
                     <MenuItem onClick={() => helpItemClicked(props.aboutClicked)}>About Tesserow</MenuItem>
                 </Menu>
             </AppBar>
