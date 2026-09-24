@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -20,9 +19,7 @@ const HelpDialog = (props: HelpDialogProperties) => {
                 {props.children}
             </DialogContent>
             <DialogActions>
-                <ButtonGroup variant='contained'>
-                    <Button onClick={props.onClose}>Close</Button>
-                </ButtonGroup>
+                <Button onClick={props.onClose}>Close</Button>
             </DialogActions>
         </Dialog>
     );

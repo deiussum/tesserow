@@ -8,7 +8,7 @@ describe('HomePage', () => {
         const newMosaicClicked = vi.fn();
         render(<HomePage newMosaicClicked={newMosaicClicked} />);
 
-        fireEvent.click(screen.getByRole('button', { name: 'New Mosaic' }));
+        fireEvent.click(screen.getByRole('button', { name: 'New Mosaic...' }));
 
         expect(newMosaicClicked).toHaveBeenCalledTimes(1);
     });
@@ -26,7 +26,7 @@ describe('HomePage', () => {
         const importImageClicked = vi.fn();
         render(<HomePage importImageClicked={importImageClicked} />);
 
-        fireEvent.click(screen.getByRole('button', { name: 'Import Image' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Import Image...' }));
 
         expect(importImageClicked).toHaveBeenCalledTimes(1);
     });

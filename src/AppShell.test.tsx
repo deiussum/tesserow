@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, test, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import AppShell from './AppShell';
 
 describe('AppShell menu bar', () => {
@@ -13,9 +13,9 @@ describe('AppShell menu bar', () => {
 
         expect(await screen.findByRole('menuitem', { name: /New/ })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: /Open/ })).not.toHaveAttribute('aria-disabled', 'true');
-        expect(screen.getByRole('menuitem', { name: 'Import Image' })).not.toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Import Image...' })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: /Save/ })).toHaveAttribute('aria-disabled', 'true');
-        expect(screen.getByRole('menuitem', { name: 'Export to PDF' })).toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Export to PDF...' })).toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Close' })).toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Exit' })).not.toHaveAttribute('aria-disabled', 'true');
     });
@@ -29,9 +29,9 @@ describe('AppShell menu bar', () => {
 
         expect(await screen.findByRole('menuitem', { name: /New/ })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: /Open/ })).not.toHaveAttribute('aria-disabled', 'true');
-        expect(screen.getByRole('menuitem', { name: 'Import Image' })).not.toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Import Image...' })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: /Save/ })).not.toHaveAttribute('aria-disabled', 'true');
-        expect(screen.getByRole('menuitem', { name: 'Export to PDF' })).not.toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Export to PDF...' })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Close' })).not.toHaveAttribute('aria-disabled', 'true');
     });
 
@@ -84,6 +84,29 @@ describe('AppShell menu bar', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'View' }));
         expect((await screen.findByRole('menuitem', { name: 'Written Pattern' })).querySelector('svg')).not.toBeNull();
+    });
+
+    // jsdom has no layout, so this checks the order the flex row lays out in:
+    // File and View lead, and Help trails after the spacer at the far edge.
+    test.each([ false, true ])('menu bar orders File, View, then Help last (mosaicOpen=%s)', (mosaicOpen) => {
+        render(<AppShell mosaicOpen={mosaicOpen} />);
+
+        const menuBar = screen.getByRole('group', { name: 'application menu bar' });
+        const triggers = within(menuBar).getAllByRole('button').map(b => b.textContent);
+
+        expect(triggers).toEqual([ 'File', 'View', 'Help' ]);
+        expect(menuBar.lastElementChild).toBe(screen.getByRole('button', { name: 'Help' }));
+    });
+
+    test('File items that ask for more input end with an ellipsis; Close and Exit do not', async () => {
+        render(<AppShell mosaicOpen={true} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'File' }));
+        await screen.findByRole('menuitem', { name: /New/ });
+
+        // Shortcut hints (Ctrl+N etc.) are part of the item's text, so read the label span/text node only.
+        const labels = screen.getAllByRole('menuitem').map(item => (item.querySelector('span') ?? item).textContent?.trim());
+        expect(labels).toEqual([ 'New...', 'Open...', 'Import Image...', 'Save...', 'Export to PDF...', 'Close', 'Exit' ]);
     });
 
     test('Help menu opens the About item', async () => {

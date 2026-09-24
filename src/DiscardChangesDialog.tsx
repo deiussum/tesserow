@@ -1,5 +1,4 @@
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -22,10 +21,8 @@ const DiscardChangesDialog = (props: DiscardChangesDialogProps) => {
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <ButtonGroup variant='contained'>
-                    <Button onClick={props.onCancel}>Cancel</Button>
-                    <Button onClick={props.onConfirm}>Discard</Button>
-                </ButtonGroup>
+                <Button onClick={props.onCancel}>Cancel</Button>
+                <Button variant='contained' color='error' onClick={props.onConfirm}>Discard</Button>
             </DialogActions>
         </Dialog>
     );
