@@ -183,8 +183,12 @@ export const App = () => {
             chartPages: mosaic.data.getChartPageData(),
             writtenPatternLines: mosaic.data.getWrittenPatternLines(16, 65)
         };
-        await window.dialogs.export(data, options);
-        setStatusText('Exported');
+        try {
+            await window.dialogs.export(data, options);
+            setStatusText('Exported');
+        } catch (e) {
+            setStatusText('Export failed: ' + (e instanceof Error ? e.message : String(e)));
+        }
     }
 
     const saveClicked = async () => {
