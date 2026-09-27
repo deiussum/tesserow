@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.deiussum.tesserow</id>
+  <name>Tesserow</name>
+  <summary>Design mosaic crochet patterns</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="com.deiussum">
+    <name>Dan Jenkins</name>
+  </developer>
+  <description>
+    <p>
+      Tesserow is a pattern maker for mosaic crochet. Draw a chart stitch by stitch,
+      or import an image and turn it into a two-color mosaic pattern.
+    </p>
+    <ul>
+      <li>Edit charts while the mosaic crochet construction rules are enforced for you</li>
+      <li>Generate a written, row-by-row pattern alongside the chart</li>
+      <li>Export the chart and written pattern to a printable PDF, with an optional cover page</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">com.deiussum.tesserow.desktop</launchable>
+  <url type="homepage">https://github.com/deiussum/tesserow</url>
+  <url type="bugtracker">https://github.com/deiussum/tesserow/issues</url>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-09-19" />
+  </releases>
+</component>

@@ -490,3 +490,9 @@ out/
 
 # Vite / Tauri
 dist/
+
+# Flatpak (see flatpak/build.sh)
+flatpak/.build/
+flatpak/generated/
+flatpak/dist/
+.flatpak-builder/

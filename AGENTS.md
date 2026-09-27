@@ -16,8 +16,11 @@ Run from the repo root:
 - `npm run lint` — ESLint over `.ts`/`.tsx` files
 - `npm run package` — build the app binary without bundling installers (`tauri build --no-bundle`)
 - `npm run make` — build platform installers (`tauri build`, via `cross-env NO_STRIP=true` — the `linuxdeploy` tool used for AppImage bundling ships a `strip` too old for some systems' newer ELF sections, so stripping is skipped)
+- `npm run flatpak` — build the Flatpak from source (`flatpak/build.sh`: generates offline npm/cargo source lists from the lockfiles, then runs `flatpak-builder`) and write a single-file bundle to `flatpak/dist/`
 
 There is no test suite configured for this project.
+
+Release artifacts (Flatpak, `.deb`/`.rpm`/AppImage, Windows `.msi`/`-setup.exe`) are built by `.github/workflows/release.yml` on version tags, manual dispatch, and PRs touching packaging or the Tauri host; see the release steps in `CONTRIBUTING.md`.
 
 ## Application architecture
 

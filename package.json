@@ -7,6 +7,7 @@
     "start": "tauri dev",
     "package": "tauri build --no-bundle",
     "make": "cross-env NO_STRIP=true tauri build",
+    "flatpak": "flatpak/build.sh",
     "lint": "eslint --ext .ts,.tsx .",
     "test": "vitest run",
     "vite:dev": "vite",
