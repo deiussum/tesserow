@@ -218,3 +218,39 @@ describe('Session state resets when Open replaces an already-open mosaic', () =>
         await waitFor(() => expect(screen.getByText('Zoom: 100%')).toBeInTheDocument());
     });
 });
+
+describe('File > Export to PDF', () => {
+    beforeEach(() => {
+        mosaic.initialize(6, 6, 0);
+    });
+
+    test('shows the error in the status bar when the export fails, instead of staying on "Exporting..."', async () => {
+        window.dialogs = {
+            ...dialogsStub,
+            open: vi.fn().mockResolvedValue({ success: true, data: mosaic.data.getSaveData() }),
+            getFileName: vi.fn().mockResolvedValue({ success: true, result: '/home/user/chart.pdf' }),
+            export: vi.fn().mockRejectedValue(new Error('Standard font "Helvetica" is not registered.')),
+        };
+        render(<App />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'File' }));
+        fireEvent.click(await screen.findByRole('menuitem', { name: /Open/ }));
+        await waitFor(() => expect(screen.getByRole('button', { name: 'View' })).not.toBeDisabled());
+
+        fireEvent.click(screen.getByRole('button', { name: 'File' }));
+        fireEvent.click(await screen.findByRole('menuitem', { name: /Export to PDF/ }));
+
+        // The export-file picker is the only enabled folder button (the cover
+        // PDF picker is disabled until its checkbox is ticked).
+        const exportPicker = (await screen.findAllByTestId('FolderOpenIcon'))
+            .map((icon) => icon.closest('button'))
+            .find((button) => !button.disabled);
+        fireEvent.click(exportPicker);
+        await waitFor(() => expect(screen.getByDisplayValue('/home/user/chart.pdf')).toBeInTheDocument());
+
+        fireEvent.click(screen.getByRole('button', { name: 'Export' }));
+
+        expect(await screen.findByText('Export failed: Standard font "Helvetica" is not registered.')).toBeInTheDocument();
+        expect(screen.queryByText('Exporting...')).not.toBeInTheDocument();
+    });
+});

@@ -7,13 +7,21 @@ import { readTextFile, writeTextFile, readFile, writeFile } from '@tauri-apps/pl
 import { Jimp } from 'jimp';
 import { intToRGBA } from '@jimp/utils';
 // pdfkit's package exports map now resolves the bare specifier to a browser
-// build (fs/zlib/stream shimmed, fonts embedded) whenever the "node" export
-// condition isn't set, so no standalone subpath import is needed anymore.
+// build (fs/zlib/stream shimmed) whenever the "node" export condition isn't
+// set, so no standalone subpath import is needed anymore.
 import PDFDocument from 'pdfkit';
+import * as pdfkit from 'pdfkit';
+import Courier from 'pdfkit/standard-fonts/Courier';
+import Helvetica from 'pdfkit/standard-fonts/Helvetica';
 import blobStream from 'blob-stream';
 import { PDFDocument as PdfLibDocument } from 'pdf-lib';
 import ExportOptions from './ExportOptions';
 import type { MosaicChartSaveData, ChartPageData } from './Mosaic';
+
+// pdfkit's browser build ships no standard fonts; register the ones the PDF
+// export draws with (Helvetica is the default, Courier the written pattern).
+// @types/pdfkit predates 0.20 and doesn't declare registerStdFonts.
+(pdfkit as unknown as { registerStdFonts(...fonts: object[]): void }).registerStdFonts(Helvetica, Courier);
 
 export interface DialogFileNameSuccess {
     success: true;
