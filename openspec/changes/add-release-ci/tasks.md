@@ -24,7 +24,7 @@
 ## 5. Local verification of the bundle
 
 - [x] 5.1 Install the bundle with `flatpak install --user flatpak/dist/Tesserow_0.1.0_x86_64.flatpak` and verify `flatpak info com.deiussum.tesserow` shows the app ID and version `0.1.0`, and that the Tesserow launcher entry with its icon appears and opens the app (and that the running window is associated with that icon, per the StartupWMClass risk).
-- [ ] 5.2 Inside the Flatpak, save a mosaic to a folder in `~`, reopen it, import an image from `~`, and export a PDF with a cover PDF to `~`; verify each works the same as the non-Flatpak build.
+- [x] 5.2 Inside the Flatpak, save a mosaic to a folder in `~`, reopen it, import an image from `~`, and export a PDF with a cover PDF to `~`; verify each works the same as the non-Flatpak build.
 - [x] 5.3 Launch the Flatpak under Wayland and under X11 (e.g. `flatpak run --nosocket=wayland com.deiussum.tesserow`) and verify the window renders in both.
 - [x] 5.4 Verify the sandbox has no network and no filesystem access outside home: `flatpak info --show-permissions com.deiussum.tesserow` lists only the finish-args from design D4.
 
@@ -33,7 +33,7 @@
 - [x] 6.1 Add `.github/workflows/release.yml` with the triggers and `paths:` filter from design D7, workflow-level `permissions: contents: read`, and the `flatpak` job (gnome-50 builder container, `build.sh generate`, `flatpak-builder` action with lockfile-hash cache key and bundle name); verify with a `workflow_dispatch` run on the branch that the `.flatpak` bundle is uploaded as a workflow artifact.
 - [x] 6.2 Add the `linux` job per design D8 (`ubuntu-22.04`, apt prerequisites, Node/Rust setup + caches, `npm ci`, `npm run make`, upload the `.deb`/`.rpm`/AppImage); verify via `workflow_dispatch` that all three files are uploaded with the expected Tauri names.
 - [x] 6.3 Add the `windows` job per design D8 (`windows-latest`, Node/Rust setup + caches, `npm ci`, `npm run make`, upload the `.msi` and `-setup.exe`); verify via `workflow_dispatch` that both files are uploaded with the expected names.
-- [ ] 6.4 Download the CI-built `.deb` or AppImage and verify it installs/launches on Linux and can save/open a mosaic, the same as a hand-built release.
+- [x] 6.4 Download the CI-built `.deb` or AppImage and verify it installs/launches on Linux and can save/open a mosaic, the same as a hand-built release.
 - [ ] 6.5 (Maintainer, on Windows) Run the CI-built `-setup.exe` and `.msi` and verify each installs and launches Tesserow (past the expected SmartScreen warning) and can save/open a mosaic.
 - [x] 6.6 Add the tag-only `release` job (`needs: [flatpak, linux, windows]`, `contents: write`, download all artifacts, `gh release view || gh release create --draft`, `gh release upload --clobber`); verify by pushing a throwaway tag (e.g. `v0.0.0-ci-test`, with the maintainer's go-ahead) that all six files land on a draft release, then delete that tag and release.
 - [x] 6.7 Verify release gating and preservation: confirm from the workflow graph that `release` cannot run unless all three build jobs succeed, and (re-running the throwaway tag build against a release with hand-edited notes) that the notes/title/draft state are unchanged after upload.
