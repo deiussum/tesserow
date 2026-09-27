@@ -35,12 +35,12 @@
 - [x] 6.3 Add the `windows` job per design D8 (`windows-latest`, Node/Rust setup + caches, `npm ci`, `npm run make`, upload the `.msi` and `-setup.exe`); verify via `workflow_dispatch` that both files are uploaded with the expected names.
 - [ ] 6.4 Download the CI-built `.deb` or AppImage and verify it installs/launches on Linux and can save/open a mosaic, the same as a hand-built release.
 - [ ] 6.5 (Maintainer, on Windows) Run the CI-built `-setup.exe` and `.msi` and verify each installs and launches Tesserow (past the expected SmartScreen warning) and can save/open a mosaic.
-- [ ] 6.6 Add the tag-only `release` job (`needs: [flatpak, linux, windows]`, `contents: write`, download all artifacts, `gh release view || gh release create --draft`, `gh release upload --clobber`); verify by pushing a throwaway tag (e.g. `v0.0.0-ci-test`, with the maintainer's go-ahead) that all six files land on a draft release, then delete that tag and release.
-- [ ] 6.7 Verify release gating and preservation: confirm from the workflow graph that `release` cannot run unless all three build jobs succeed, and (re-running the throwaway tag build against a release with hand-edited notes) that the notes/title/draft state are unchanged after upload.
+- [x] 6.6 Add the tag-only `release` job (`needs: [flatpak, linux, windows]`, `contents: write`, download all artifacts, `gh release view || gh release create --draft`, `gh release upload --clobber`); verify by pushing a throwaway tag (e.g. `v0.0.0-ci-test`, with the maintainer's go-ahead) that all six files land on a draft release, then delete that tag and release.
+- [x] 6.7 Verify release gating and preservation: confirm from the workflow graph that `release` cannot run unless all three build jobs succeed, and (re-running the throwaway tag build against a release with hand-edited notes) that the notes/title/draft state are unchanged after upload.
 - [x] 6.8 Verify the PR trigger: the PR for this change runs the workflow (it touches `flatpak/**` and `.github/workflows/`), and confirm from the `paths:` filter that a `src/`-only PR would not.
 
 ## 7. Documentation
 
 - [x] 7.1 Add a Flatpak section to `README.md` (installing a downloaded bundle, the `--filesystem=home` note and `flatpak override` tip for `/media`, building locally with `npm run flatpak`), a note that Windows installers are unsigned and trigger SmartScreen, and add `npm run flatpak` to the Commands list in `AGENTS.md`; verify the documented commands match the script.
 - [x] 7.2 Document the CI-based release steps in `CONTRIBUTING.md` (bump version in `package.json`/`tauri.conf.json` and add a `<release>` entry to `flatpak/com.deiussum.tesserow.metainfo.xml`, merge to `main`, push the tag, then write notes and publish the release once assets are attached) and verify the `build.sh` version-check error message points to it.
-- [ ] 7.3 Run `openspec validate add-release-ci --strict` and verify it passes.
+- [x] 7.3 Run `openspec validate add-release-ci --strict` and verify it passes.
