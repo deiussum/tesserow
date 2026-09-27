@@ -1,0 +1,56 @@
+# Built by flatpak/build.sh, which first generates generated/*-sources.json
+# from the lockfiles so the build itself runs offline.
+id: com.deiussum.tesserow
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+  - org.freedesktop.Sdk.Extension.node24
+command: com.deiussum.tesserow
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  # The file dialogs run in-process (GTK, not the file chooser portal), so
+  # the sandbox needs direct access to wherever users keep their files.
+  - --filesystem=home
+
+modules:
+  - name: tesserow
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node24/bin
+      env:
+        CARGO_HOME: /run/build/tesserow/cargo
+        CARGO_NET_OFFLINE: 'true'
+        XDG_CACHE_HOME: /run/build/tesserow/flatpak-node/cache
+        npm_config_cache: /run/build/tesserow/flatpak-node/npm-cache
+        npm_config_offline: 'true'
+    sources:
+      - type: dir
+        path: ..
+        skip:
+          - .git
+          - node_modules
+          - dist
+          - src-tauri/target
+          - src-tauri/gen
+          - .flatpak-builder
+          - flatpak/.build
+          - flatpak/generated
+          - flatpak/dist
+      - generated/node-sources.json
+      - generated/cargo-sources.json
+    build-commands:
+      - npm ci --offline
+      - npm run tauri -- build --no-bundle
+      - install -Dm755 src-tauri/target/release/app /app/bin/com.deiussum.tesserow
+      - install -Dm644 flatpak/com.deiussum.tesserow.desktop /app/share/applications/com.deiussum.tesserow.desktop
+      - install -Dm644 flatpak/com.deiussum.tesserow.metainfo.xml /app/share/metainfo/com.deiussum.tesserow.metainfo.xml
+      - install -Dm644 src-tauri/icons/32x32.png /app/share/icons/hicolor/32x32/apps/com.deiussum.tesserow.png
+      - install -Dm644 src-tauri/icons/128x128.png /app/share/icons/hicolor/128x128/apps/com.deiussum.tesserow.png
+      - install -Dm644 src-tauri/icons/128x128@2x.png /app/share/icons/hicolor/256x256/apps/com.deiussum.tesserow.png
+      - install -Dm644 src-tauri/icons/icon.png /app/share/icons/hicolor/512x512/apps/com.deiussum.tesserow.png
+      - appstreamcli validate --no-net /app/share/metainfo/com.deiussum.tesserow.metainfo.xml

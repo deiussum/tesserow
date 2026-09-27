@@ -19,6 +19,16 @@ Both `main` and `develop` are protected: nobody pushes directly, including the m
 - **Feature branch → `develop`**: squash-merge. Each feature branch collapses into a single, well-formed commit on `develop`, regardless of how messy its own history was.
 - **`develop` → `main`**: merge or fast-forward when cutting a release. By this point `develop`'s history is already the curated sequence of changes for that release, so it isn't squashed again — that history is worth keeping in `main`'s permanent record.
 
+## Releases
+
+Release artifacts are built by CI (`.github/workflows/release.yml`), not by hand:
+
+1. On a feature branch, bump the version in `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml`, and add a `<release version="…" date="…">` entry for it to `flatpak/com.deiussum.tesserow.metainfo.xml` (the Flatpak build fails without one). Merge it into `develop`.
+2. Merge `develop` into `main`.
+3. Tag the release on `main` (`git tag vX.Y.Z`) and push the tag.
+4. The workflow builds the Flatpak, the Linux `.deb`/`.rpm`/AppImage, and the Windows `.msi`/`-setup.exe`. Only if all of them succeed, it attaches them to the GitHub release for the tag, creating a draft release if there isn't one yet. It never changes an existing release's title, notes, or draft state.
+5. Write the release notes and publish the release.
+
 ## Commit messages
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/). Examples from this project's own history:

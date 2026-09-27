@@ -4,7 +4,7 @@ import importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
     {
-        ignores: ['dist/**', 'node_modules/**', 'src-tauri/target/**', '.pnp.*'],
+        ignores: ['dist/**', 'node_modules/**', 'src-tauri/target/**', '.pnp.*', 'flatpak/.build/**', 'flatpak/dist/**', '.flatpak-builder/**'],
     },
     js.configs.recommended,
     // eslint-disable-next-line import/no-named-as-default-member -- this is typescript-eslint's own documented usage

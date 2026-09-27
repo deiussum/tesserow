@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Tesserow
+GenericName=Mosaic Crochet Pattern Maker
+Comment=Design mosaic crochet patterns and export them as printable charts
+Exec=com.deiussum.tesserow
+Icon=com.deiussum.tesserow
+Terminal=false
+Categories=Graphics;
+Keywords=crochet;mosaic;pattern;chart;
