@@ -25,9 +25,11 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@v7
-      - name: Install source generator prerequisites
-        run: dnf install -y python3 curl tar
       - name: Generate offline sources
+        # The builder image points PYTHONPATH at its own site-packages; keep
+        # it out of the generators' venv.
+        env:
+          PYTHONPATH: ''
         run: flatpak/build.sh generate
       - name: Read version
         id: version
@@ -38,6 +40,10 @@ jobs:
           bundle: Tesserow_${{ steps.version.outputs.version }}_x86_64.flatpak
           cache-key: flatpak-builder-${{ hashFiles('package-lock.json', 'src-tauri/Cargo.lock') }}
           artifact-name: flatpak
+          # Keep flatpak-builder's dirs inside the tree the manifest's source skips.
+          build-dir: flatpak/.build/build-dir
+          repo-dir: flatpak/.build/repo
+          state-dir: flatpak/.build/state
 
   linux:
     # An older base than ubuntu-latest: the .deb/AppImage link against the
