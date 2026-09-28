@@ -39,3 +39,9 @@ The Windows installers are not code-signed, so Windows SmartScreen shows a "Wind
 ## Building the Flatpak
 
 `npm run flatpak` builds the Flatpak from source and writes the bundle to `flatpak/dist/`. It needs `flatpak` with the Flathub remote added, plus either `flatpak-builder` or the Flathub-packaged builder (`flatpak install flathub org.flatpak.Builder`), and Python 3 to generate the offline dependency lists. The GNOME SDK and the Rust/Node SDK extensions are installed on first run. (The Flathub-packaged builder is sandboxed and can't see `/tmp`, so build from a checkout elsewhere when using it.)
+
+## App icon
+
+The icon is a 16×16 mosaic-chart diamond defined in `Resources/Icon/icon-grid.txt` (`#` = amber, `.` = navy). After editing it, run `npm run icon` to regenerate every icon size and format, and commit the results.
+
+The icon is a stylised mark, not a workable chart. `Resources/Samples/diamond.json` is the same motif redrawn to follow the mosaic crochet rules, and you can open it in Tesserow with File > Open.
