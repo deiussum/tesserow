@@ -8,6 +8,7 @@
     "package": "tauri build --no-bundle",
     "make": "cross-env NO_STRIP=true tauri build",
     "flatpak": "flatpak/build.sh",
+    "icon": "node scripts/render-icon.mjs",
     "lint": "eslint --ext .ts,.tsx .",
     "test": "vitest run",
     "vite:dev": "vite",

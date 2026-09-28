@@ -17,6 +17,7 @@ Run from the repo root:
 - `npm run package` — build the app binary without bundling installers (`tauri build --no-bundle`)
 - `npm run make` — build platform installers (`tauri build`, via `cross-env NO_STRIP=true` — the `linuxdeploy` tool used for AppImage bundling ships a `strip` too old for some systems' newer ELF sections, so stripping is skipped)
 - `npm run flatpak` — build the Flatpak from source (`flatpak/build.sh`: generates offline npm/cargo source lists from the lockfiles, then runs `flatpak-builder`) and write a single-file bundle to `flatpak/dist/`
+- `npm run icon` — regenerate every app icon file (`Resources/Icon/` and `src-tauri/icons/`) from `Resources/Icon/icon-grid.txt` via `scripts/render-icon.mjs`; sizes up to 48px are drawn one chart cell per whole pixel, larger ones come from a detailed 1024px master. Commit the regenerated files with the grid change
 
 There is no test suite configured for this project.
 
