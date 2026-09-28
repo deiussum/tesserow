@@ -10,7 +10,7 @@
 
 - [x] 2.1 Add hicolor 16/24/48 px installs from `Resources/Icon/` to `flatpak/com.deiussum.tesserow.yml`, run `npm run flatpak`, install the bundle, and verify `~/.local/share/flatpak/app/com.deiussum.tesserow/current/active/export/share/icons/hicolor/` has 16, 24, 32, 48, 128, 256 and 512 px icons.
 - [x] 2.2 Verify on Linux that the Flatpak's launcher entry and running window show the diamond icon (not the Tauri rings), and that `npm start` shows it as the window icon.
-- [ ] 2.3 On the PR, verify the CI release jobs pass, then (maintainer, on Windows) install the CI-built `-setup.exe` and check that the Start menu entry, the executable and the taskbar show the diamond icon.
+- [x] 2.3 On the PR, verify the CI release jobs pass, then (maintainer, on Windows) install the CI-built `-setup.exe` and check that the Start menu entry, the executable and the taskbar show the diamond icon.
 
 ## 3. Sample chart
 
