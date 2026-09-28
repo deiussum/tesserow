@@ -12,6 +12,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    watch: {
+      // flatpak-builder's build dirs hold a sandbox filesystem with symlink
+      // loops (var/run), which crash the watcher with ELOOP.
+      ignored: ['**/flatpak/.build/**', '**/flatpak/dist/**'],
+    },
   },
   build: {
     outDir: 'dist',
