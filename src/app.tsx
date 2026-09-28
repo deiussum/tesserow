@@ -16,7 +16,8 @@ import StatusBar from './StatusBar';
 import DiscardChangesDialog from './DiscardChangesDialog';
 import AboutDialog from './AboutDialog';
 import mosaic from './Mosaic';
-import type { ImageImportSuccess } from './dialogs-bridge';
+import type { MosaicChartSaveData } from './Mosaic';
+import type { DialogSaveResult, ImageImportSuccess } from './dialogs-bridge';
 
 const ZOOM_MIN = 0.25;
 const ZOOM_MAX = 4.0;
@@ -94,6 +95,7 @@ export const App = () => {
             setMosaicEditorShown(false);
             setHomePageShown(true);
             mosaic.isDirty = false;
+            mosaic.filePath = null;
             resetEditorSessionState();
         });
     };
@@ -157,6 +159,7 @@ export const App = () => {
         if (!response.success) return false;
 
         mosaic.load(response.data);
+        mosaic.filePath = response.filePath;
         return true;
     }
 
@@ -191,12 +194,31 @@ export const App = () => {
         }
     }
 
-    const saveClicked = async () => {
+    // Save and Save As read mosaic.filePath off the singleton rather than
+    // React state so the keydown handler below never sees a stale path.
+    const runSave = async (write: (data: MosaicChartSaveData) => Promise<DialogSaveResult>) => {
         setStatusText('Saving...');
-        const data = mosaic.data.getSaveData();
-        const result = await window.dialogs.save(data);
-        if (result.success) mosaic.isDirty = false;
-        setStatusText('Saved');
+        try {
+            const result = await write(mosaic.data.getSaveData());
+            if (result.success) {
+                mosaic.filePath = result.filePath;
+                mosaic.isDirty = false;
+            }
+            setStatusText('Saved');
+        } catch (e) {
+            setStatusText('Save failed: ' + (e instanceof Error ? e.message : String(e)));
+        }
+    }
+
+    const saveClicked = async () => {
+        const filePath = mosaic.filePath;
+        await runSave((data) => filePath
+            ? window.dialogs.save(data, filePath)
+            : window.dialogs.saveAs(data));
+    }
+
+    const saveAsClicked = async () => {
+        await runSave((data) => window.dialogs.saveAs(data, mosaic.filePath ?? undefined));
     }
 
     const exitClicked = () => {
@@ -254,6 +276,10 @@ export const App = () => {
                     e.preventDefault();
                     zoomResetClicked();
                     return;
+                } else if ((e.key === 's' || e.key === 'S') && e.shiftKey) {
+                    e.preventDefault();
+                    saveAsClicked();
+                    return;
                 } else if (e.key === 's' || e.key === 'S') {
                     e.preventDefault();
                     saveClicked();
@@ -302,6 +328,7 @@ export const App = () => {
                 toggleWrittenPatternClicked={toggleWrittenPatternClicked}
                 exportClicked={exportClicked}
                 saveClicked={saveClicked}
+                saveAsClicked={saveAsClicked}
                 closeClicked={mosaicClosedClicked}
                 exitClicked={exitClicked}
                 zoomInClicked={zoomInClicked}

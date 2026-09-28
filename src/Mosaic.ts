@@ -32,6 +32,9 @@ class Mosaic {
     data: MosaicChart = null;
     hovering: MosaicCell = null;
     isDirty: boolean = false;
+    // The file this chart was loaded from or last saved to - null until it
+    // has one, so File > Save knows whether it has to ask for a destination.
+    filePath: string | null = null;
     // Tracks which canvas element currently has listeners attached, rather
     // than a one-time boolean - MosaicEditor mounts a fresh <canvas> every
     // time the editor opens (e.g. after Close then reopening), so listeners
@@ -41,6 +44,7 @@ class Mosaic {
     initialize = (width: number, height: number, extraRows: number) => {
         this.data = new MosaicChart(width, height);
         this.isDirty = false;
+        this.filePath = null;
 
         if (extraRows > 0) this.data.addExtraRows(extraRows);
     }

@@ -216,3 +216,22 @@ describe('save/load round trip', () => {
         expect(after).toEqual(before);
     });
 });
+
+describe('associated file tracking', () => {
+    test('initializing a chart clears its associated file', () => {
+        mosaic.initialize(6, 6, 0);
+        mosaic.filePath = '/home/user/chart.json';
+
+        mosaic.initialize(6, 6, 0);
+        expect(mosaic.filePath).toBeNull();
+    });
+
+    test('loading a chart clears its associated file until the caller sets the new one', () => {
+        mosaic.initialize(6, 6, 0);
+        const saveData = mosaic.data.getSaveData();
+        mosaic.filePath = '/home/user/chart.json';
+
+        mosaic.load(saveData);
+        expect(mosaic.filePath).toBeNull();
+    });
+});

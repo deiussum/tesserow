@@ -38,9 +38,20 @@ export interface DialogActionResult {
     error?: string;
 }
 
+export interface DialogSaveSuccess {
+    success: true;
+    filePath: string;
+}
+export interface DialogSaveFailure {
+    success: false;
+    error: string;
+}
+export type DialogSaveResult = DialogSaveSuccess | DialogSaveFailure;
+
 export interface DialogOpenSuccess {
     success: true;
     data: MosaicChartSaveData;
+    filePath: string;
 }
 export interface DialogOpenFailure {
     success: false;
@@ -70,7 +81,8 @@ export interface ExportData {
 
 export interface DialogsApi {
     getFileName: (filters: DialogFilter[], save: boolean) => Promise<DialogFileNameResult>;
-    save: (data: MosaicChartSaveData) => Promise<DialogActionResult>;
+    save: (data: MosaicChartSaveData, filePath: string) => Promise<DialogSaveResult>;
+    saveAs: (data: MosaicChartSaveData, defaultPath?: string) => Promise<DialogSaveResult>;
     open: () => Promise<DialogOpenResult>;
     import: () => Promise<ImageImportResult>;
     resize: (filePath: string, width: number, height: number) => Promise<ImageImportSuccess>;
@@ -97,12 +109,18 @@ async function getFileName(filters: DialogFilter[], save: boolean): Promise<Dial
     return { success: true, result };
 }
 
-async function save(data: MosaicChartSaveData): Promise<DialogActionResult> {
-    const filePath = await saveDialog({ filters: [{ extensions: ['json'], name: 'JSON Files' }] });
+// Write errors reject rather than returning success: false, so callers can
+// tell a failed write apart from a cancelled dialog.
+async function save(data: MosaicChartSaveData, filePath: string): Promise<DialogSaveResult> {
+    await writeTextFile(filePath, JSON.stringify(data, null, 2));
+    return { success: true, filePath };
+}
+
+async function saveAs(data: MosaicChartSaveData, defaultPath?: string): Promise<DialogSaveResult> {
+    const filePath = await saveDialog({ filters: [{ extensions: ['json'], name: 'JSON Files' }], defaultPath });
     if (!filePath) return { success: false, error: 'Save cancelled' };
 
-    await writeTextFile(filePath, JSON.stringify(data, null, 2));
-    return { success: true };
+    return await save(data, filePath);
 }
 
 async function open(): Promise<DialogOpenResult> {
@@ -110,7 +128,7 @@ async function open(): Promise<DialogOpenResult> {
     if (!filePath) return { success: false, error: 'Open cancelled' };
 
     const text = await readTextFile(filePath as string);
-    return { success: true, data: JSON.parse(text) };
+    return { success: true, data: JSON.parse(text), filePath: filePath as string };
 }
 
 async function loadJimpImage(filePath: string): Promise<JimpImage> {
@@ -292,6 +310,7 @@ async function exportPdf(data: ExportData, options: ExportOptions): Promise<Dial
 window.dialogs = {
     getFileName,
     save,
+    saveAs,
     open,
     import: importImage,
     resize,
