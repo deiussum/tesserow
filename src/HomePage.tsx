@@ -1,6 +1,7 @@
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import styles from './HomePage.module.css';
 
 interface HomePageProps {
@@ -10,17 +11,25 @@ interface HomePageProps {
 }
 
 const HomePage = (props: HomePageProps) => {
-
     return (
-        <Container className={styles.background}>
-            <div className={styles.contentArea}>
-                <ButtonGroup variant='contained' orientation='vertical' aria-label='outlined primary button group'>
-                    <Button onClick={props.newMosaicClicked}>Create New</Button>
-                    <Button onClick={props.loadMosaicClicked}>Load File</Button>
-                    <Button onClick={props.importImageClicked}>Import Image</Button>
-                </ButtonGroup>
-            </div>
-        </Container>
+        <div className={styles.background}>
+            <Typography variant='h4' component='h1' className={styles.wordmark}>
+                Tesserow
+            </Typography>
+            <Paper className={styles.startCard} elevation={4}>
+                <Stack spacing={2}>
+                    <Button variant='contained' size='large' onClick={props.newMosaicClicked}>
+                        New Mosaic...
+                    </Button>
+                    <Button variant='outlined' onClick={props.loadMosaicClicked}>
+                        Open...
+                    </Button>
+                    <Button variant='outlined' onClick={props.importImageClicked}>
+                        Import Image...
+                    </Button>
+                </Stack>
+            </Paper>
+        </div>
     );
 }
 

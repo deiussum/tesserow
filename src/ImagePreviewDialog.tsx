@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Dialog from '@mui/material/Dialog';
@@ -182,10 +181,8 @@ const ImagePreviewDialog = (props: ImagePreviewDialogProps) => {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <ButtonGroup variant='contained'>
-                        <Button onClick={props.handleClose}>Cancel</Button>
-                        <Button type='submit'>Import</Button>
-                    </ButtonGroup>
+                    <Button onClick={props.handleClose}>Cancel</Button>
+                    <Button variant='contained' type='submit'>Import</Button>
                 </DialogActions>
             </Box>
         </Dialog>

@@ -430,6 +430,9 @@ test-results/
 
 # Icon must end with two \r
 Icon
+# The rule above is meant for macOS's Icon\r files, but in this CRLF file it
+# matches any path named Icon; keep the app icon sources tracked.
+!/Resources/Icon/
 
 
 # Thumbnails
@@ -490,3 +493,9 @@ out/
 
 # Vite / Tauri
 dist/
+
+# Flatpak (see flatpak/build.sh)
+flatpak/.build/
+flatpak/generated/
+flatpak/dist/
+.flatpak-builder/

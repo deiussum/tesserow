@@ -1,12 +1,14 @@
 {
   "name": "tesserow",
   "productName": "Tesserow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Mosaic crochet pattern generator",
   "scripts": {
     "start": "tauri dev",
     "package": "tauri build --no-bundle",
     "make": "cross-env NO_STRIP=true tauri build",
+    "flatpak": "flatpak/build.sh",
+    "icon": "node scripts/render-icon.mjs",
     "lint": "eslint --ext .ts,.tsx .",
     "test": "vitest run",
     "vite:dev": "vite",
@@ -22,6 +24,8 @@
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@tauri-apps/cli": "^2.11.4",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/blob-stream": "^0.1.33",
     "@types/node": "^26.6.1",
     "@types/pdfkit": "^0.17.6",
@@ -33,6 +37,7 @@
     "eslint": "^9.39.5",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
+    "jsdom": "^30.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0",

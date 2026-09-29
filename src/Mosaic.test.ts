@@ -161,6 +161,45 @@ describe('written pattern text', () => {
     });
 });
 
+describe('unsaved-changes tracking', () => {
+    test('a successful toggle marks the chart dirty', () => {
+        mosaic.initialize(6, 6, 0);
+        const cell = mosaic.data.getCellByChartRowAndCol(3, 3);
+
+        expect(mosaic.isDirty).toBe(false);
+        expect(cell.toggleColor()).toBe(true);
+        expect(mosaic.isDirty).toBe(true);
+    });
+
+    test('a rejected toggle leaves the dirty state unchanged', () => {
+        mosaic.initialize(6, 6, 0);
+        const edgeCell = mosaic.data.rows[0].cells[2];
+
+        expect(mosaic.isDirty).toBe(false);
+        expect(edgeCell.toggleColor()).toBe(false);
+        expect(mosaic.isDirty).toBe(false);
+    });
+
+    test('initializing a chart clears the dirty state', () => {
+        mosaic.initialize(6, 6, 0);
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+        expect(mosaic.isDirty).toBe(true);
+
+        mosaic.initialize(6, 6, 0);
+        expect(mosaic.isDirty).toBe(false);
+    });
+
+    test('loading a chart clears the dirty state', () => {
+        mosaic.initialize(6, 6, 0);
+        const saveData = mosaic.data.getSaveData();
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+        expect(mosaic.isDirty).toBe(true);
+
+        mosaic.load(saveData);
+        expect(mosaic.isDirty).toBe(false);
+    });
+});
+
 describe('save/load round trip', () => {
     test('loading saved data into a fresh chart of the same size reproduces every cell', () => {
         mosaic.initialize(6, 6, 0);
@@ -175,5 +214,24 @@ describe('save/load round trip', () => {
 
         const after = mosaic.data.rows.map((row) => row.cells.map((cell) => ({ color: cell.color, type: cell.type })));
         expect(after).toEqual(before);
+    });
+});
+
+describe('associated file tracking', () => {
+    test('initializing a chart clears its associated file', () => {
+        mosaic.initialize(6, 6, 0);
+        mosaic.filePath = '/home/user/chart.json';
+
+        mosaic.initialize(6, 6, 0);
+        expect(mosaic.filePath).toBeNull();
+    });
+
+    test('loading a chart clears its associated file until the caller sets the new one', () => {
+        mosaic.initialize(6, 6, 0);
+        const saveData = mosaic.data.getSaveData();
+        mosaic.filePath = '/home/user/chart.json';
+
+        mosaic.load(saveData);
+        expect(mosaic.filePath).toBeNull();
     });
 });

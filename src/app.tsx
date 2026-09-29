@@ -1,26 +1,83 @@
 import { createRoot } from 'react-dom/client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme';
+import AppShell from './AppShell';
 import HomePage from './HomePage';
 import NewMosaicForm from './NewMosaicForm';
 import MosaicEditor from './MosaicEditor';
 import ImagePreviewDialog from './ImagePreviewDialog';
+import ExportDialog from './ExportDialog';
+import ExportOptions from './ExportOptions';
+import WrittenPatternDialog, { PATTERN_PANEL_DEFAULT_WIDTH } from './WrittenPatternDialog';
+import StatusBar from './StatusBar';
+import DiscardChangesDialog from './DiscardChangesDialog';
+import AboutDialog from './AboutDialog';
 import mosaic from './Mosaic';
-import type { ImageImportSuccess } from './dialogs-bridge';
+import type { MosaicChartSaveData } from './Mosaic';
+import type { DialogSaveResult, ImageImportSuccess } from './dialogs-bridge';
 
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 4.0;
+const ZOOM_STEP = 0.1;
 
-const App = () => {
+export const App = () => {
     const [ homePageShown, setHomePageShown ] = useState(true);
     const [ newMosaicFormShown, setNewMosaicFormShown ] = useState(false);
     const [ mosaicEditorShown, setMosaicEditorShown ] = useState(false);
     const [ previewShown, setPreviewShown ] = useState(false);
     const [ previewImageData, setPreviewImageData ] = useState<ImageImportSuccess>(null);
 
+    const [ exportDialogShown, setExportDialogShown ] = useState(false);
+    const [ patternPanelOpen, setPatternPanelOpen ] = useState(false);
+    const [ patternPanelWidth, setPatternPanelWidth ] = useState(PATTERN_PANEL_DEFAULT_WIDTH);
+    const [ zoomLevel, setZoomLevel ] = useState(1.0);
+    const [ zoomString, setZoomString ] = useState('Zoom: 100%');
+    const [ statusText, setStatusText ] = useState('Ready');
+    const [ pendingAction, setPendingAction ] = useState<(() => void) | null>(null);
+    const [ aboutShown, setAboutShown ] = useState(false);
+
+    const runWithDirtyGuard = (action: () => void) => {
+        if (mosaic.isDirty) {
+            setPendingAction(() => action);
+        } else {
+            action();
+        }
+    }
+
+    // Matches the session reset New/Open/Import/Close all commit to once
+    // they actually replace the current mosaic - called at the point each
+    // one actually takes effect, not when the guard first lets them proceed,
+    // so cancelling a sub-dialog (e.g. New Mosaic) after that point doesn't
+    // reset state out from under the mosaic that's still open.
+    const resetEditorSessionState = () => {
+        setZoomLevel(1.0);
+        setZoomString('Zoom: 100%');
+        setStatusText('Ready');
+        setPatternPanelOpen(false);
+        setPatternPanelWidth(PATTERN_PANEL_DEFAULT_WIDTH);
+        setExportDialogShown(false);
+    }
+
+    const discardConfirmed = () => {
+        const action = pendingAction;
+        setPendingAction(null);
+        action?.();
+    }
+
+    const discardCancelled = () => {
+        setPendingAction(null);
+    }
+
     const newMosaicClicked = () => {
-        setNewMosaicFormShown(true);
+        runWithDirtyGuard(() => setNewMosaicFormShown(true));
     }
 
     const newMosaicCreated = () => {
         setNewMosaicFormShown(false);
+        resetEditorSessionState();
         setHomePageShown(false);
         setMosaicEditorShown(true);
     }
@@ -29,13 +86,18 @@ const App = () => {
         setNewMosaicFormShown(false);
     }
 
-    const importMosaicClicked = async () => {
-        await importImage();
+    const importMosaicClicked = () => {
+        runWithDirtyGuard(() => { void importImage(); });
     }
 
     const mosaicClosedClicked = () => {
-        setMosaicEditorShown(false);
-        setHomePageShown(true);
+        runWithDirtyGuard(() => {
+            setMosaicEditorShown(false);
+            setHomePageShown(true);
+            mosaic.isDirty = false;
+            mosaic.filePath = null;
+            resetEditorSessionState();
+        });
     };
 
     const importImage = async () => {
@@ -73,15 +135,21 @@ const App = () => {
             }
         }
         setPreviewShown(false);
+        resetEditorSessionState();
         setHomePageShown(false);
         setMosaicEditorShown(true);
     }
 
-    const loadMosaicClicked = async () => {
-        if (await loadFile()) {
-            setHomePageShown(false);
-            setMosaicEditorShown(true);
-        }
+    const loadMosaicClicked = () => {
+        runWithDirtyGuard(() => {
+            loadFile().then((loaded) => {
+                if (loaded) {
+                    resetEditorSessionState();
+                    setHomePageShown(false);
+                    setMosaicEditorShown(true);
+                }
+            });
+        });
     }
 
     const loadFile = async() => {
@@ -91,6 +159,7 @@ const App = () => {
         if (!response.success) return false;
 
         mosaic.load(response.data);
+        mosaic.filePath = response.filePath;
         return true;
     }
 
@@ -98,22 +167,219 @@ const App = () => {
         setPreviewShown(false);
     }
 
+    const toggleWrittenPatternClicked = () => {
+        setPatternPanelOpen(!patternPanelOpen);
+    }
+
+    const exportCanceled = () => {
+        setExportDialogShown(false);
+    }
+
+    const exportClicked = () => {
+        setExportDialogShown(true);
+    }
+
+    const exportConfirmed = async (options: ExportOptions) => {
+        setExportDialogShown(false);
+        setStatusText('Exporting...');
+        const data = {
+            chartPages: mosaic.data.getChartPageData(),
+            writtenPatternLines: mosaic.data.getWrittenPatternLines(16, 65)
+        };
+        try {
+            await window.dialogs.export(data, options);
+            setStatusText('Exported');
+        } catch (e) {
+            setStatusText('Export failed: ' + (e instanceof Error ? e.message : String(e)));
+        }
+    }
+
+    // Save and Save As read mosaic.filePath off the singleton rather than
+    // React state so the keydown handler below never sees a stale path.
+    const runSave = async (write: (data: MosaicChartSaveData) => Promise<DialogSaveResult>) => {
+        setStatusText('Saving...');
+        try {
+            const result = await write(mosaic.data.getSaveData());
+            if (result.success) {
+                mosaic.filePath = result.filePath;
+                mosaic.isDirty = false;
+            }
+            setStatusText('Saved');
+        } catch (e) {
+            setStatusText('Save failed: ' + (e instanceof Error ? e.message : String(e)));
+        }
+    }
+
+    const saveClicked = async () => {
+        const filePath = mosaic.filePath;
+        await runSave((data) => filePath
+            ? window.dialogs.save(data, filePath)
+            : window.dialogs.saveAs(data));
+    }
+
+    const saveAsClicked = async () => {
+        await runSave((data) => window.dialogs.saveAs(data, mosaic.filePath ?? undefined));
+    }
+
+    const exitClicked = () => {
+        void getCurrentWindow().close();
+    }
+
+    const aboutClicked = () => {
+        setAboutShown(true);
+    }
+
+    const aboutClosed = () => {
+        setAboutShown(false);
+    }
+
+    const setZoomStringFromZoom = (zoom: number) => {
+        setZoomString(`Zoom: ${(zoom * 100).toFixed(0)}%`);
+    }
+
+    const setZoom = (next: number) => {
+        const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, next));
+        setZoomLevel(clamped);
+        setZoomStringFromZoom(clamped);
+    }
+
+    const zoomInClicked = () => {
+        setZoom(zoomLevel + ZOOM_STEP);
+    }
+
+    const zoomOutClicked = () => {
+        setZoom(zoomLevel - ZOOM_STEP);
+    }
+
+    const zoomResetClicked = () => {
+        setZoom(1.0);
+    }
+
+    const zoomPresetSelected = (zoom: number) => {
+        setZoom(zoom);
+    }
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!(e.ctrlKey || e.metaKey)) return;
+
+            if (mosaicEditorShown) {
+                if (e.key === '+' || e.key === '=') {
+                    e.preventDefault();
+                    zoomInClicked();
+                    return;
+                } else if (e.key === '-') {
+                    e.preventDefault();
+                    zoomOutClicked();
+                    return;
+                } else if (e.key === '0') {
+                    e.preventDefault();
+                    zoomResetClicked();
+                    return;
+                } else if ((e.key === 's' || e.key === 'S') && e.shiftKey) {
+                    e.preventDefault();
+                    saveAsClicked();
+                    return;
+                } else if (e.key === 's' || e.key === 'S') {
+                    e.preventDefault();
+                    saveClicked();
+                    return;
+                }
+            }
+
+            // New/Open apply regardless of whether a mosaic is already open -
+            // same as the File menu items, they go through the dirty-check
+            // guard rather than being disabled while editing.
+            if (e.key === 'n' || e.key === 'N') {
+                e.preventDefault();
+                newMosaicClicked();
+            } else if (e.key === 'o' || e.key === 'O') {
+                e.preventDefault();
+                loadMosaicClicked();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [mosaicEditorShown, zoomLevel]);
+
+    useEffect(() => {
+        const appWindow = getCurrentWindow();
+        let unlisten: (() => void) | undefined;
+
+        appWindow.onCloseRequested((event) => {
+            if (!mosaic.isDirty) return;
+
+            event.preventDefault();
+            setPendingAction(() => () => { void appWindow.destroy(); });
+        }).then((fn) => { unlisten = fn; });
+
+        return () => unlisten?.();
+    }, []);
+
     return (
-        <>
-            {homePageShown ? <HomePage newMosaicClicked={newMosaicClicked} loadMosaicClicked={loadMosaicClicked} importImageClicked={importMosaicClicked} /> : null }
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <AppShell
+                mosaicOpen={mosaicEditorShown}
+                newMosaicClicked={newMosaicClicked}
+                loadMosaicClicked={loadMosaicClicked}
+                importImageClicked={importMosaicClicked}
+                toggleWrittenPatternClicked={toggleWrittenPatternClicked}
+                exportClicked={exportClicked}
+                saveClicked={saveClicked}
+                saveAsClicked={saveAsClicked}
+                closeClicked={mosaicClosedClicked}
+                exitClicked={exitClicked}
+                zoomInClicked={zoomInClicked}
+                zoomOutClicked={zoomOutClicked}
+                zoomResetClicked={zoomResetClicked}
+                aboutClicked={aboutClicked}
+                rightPanelOpen={mosaicEditorShown && patternPanelOpen}
+                rightPanelWidth={patternPanelWidth}
+                rightPanelContent={<WrittenPatternDialog width={patternPanelWidth} onResize={setPatternPanelWidth} />}
+                statusBar={
+                    <StatusBar
+                        leftText={statusText}
+                        rightText={zoomString}
+                        onZoomIn={zoomInClicked}
+                        onZoomOut={zoomOutClicked}
+                        onZoomReset={zoomResetClicked}
+                        onZoomPresetSelected={zoomPresetSelected}
+                    />
+                }
+            >
+                {homePageShown ? (
+                    <HomePage
+                        newMosaicClicked={newMosaicClicked}
+                        loadMosaicClicked={loadMosaicClicked}
+                        importImageClicked={importMosaicClicked}
+                    />
+                ) : null}
+                {mosaicEditorShown ? (
+                    <MosaicEditor zoomLevel={zoomLevel} onZoomChange={setZoom} />
+                ) : null}
+            </AppShell>
             <NewMosaicForm open={newMosaicFormShown} newMosaicCreated={newMosaicCreated} newMosaicCancelled={newMosaicCancelled} />
-            {mosaicEditorShown ? <MosaicEditor closeClicked={mosaicClosedClicked} /> : null }
-            {previewShown 
-            ? <ImagePreviewDialog open={previewShown} 
-                               data={previewImageData} 
-                               handleClose={handlePreviewClose} 
-                               onImagePreviewComplete={imagePreviewComplete} 
-                               onResizePreviewData={onResizePreview}/> 
+            <ExportDialog open={exportDialogShown} dialogClosed={exportCanceled} exportClicked={exportConfirmed} />
+            <DiscardChangesDialog open={pendingAction !== null} onConfirm={discardConfirmed} onCancel={discardCancelled} />
+            <AboutDialog open={aboutShown} onClose={aboutClosed} />
+            {previewShown
+            ? <ImagePreviewDialog open={previewShown}
+                               data={previewImageData}
+                               handleClose={handlePreviewClose}
+                               onImagePreviewComplete={imagePreviewComplete}
+                               onResizePreviewData={onResizePreview}/>
             : null }
 
-        </>
+        </ThemeProvider>
     );
 }
 
-const root = createRoot(document.getElementById('root'));
-root.render(<App/>);
+// Guarded so importing this module for tests (no #root in jsdom) doesn't
+// throw - production always has index.html's #root element.
+const rootElement = document.getElementById('root');
+if (rootElement) {
+    const root = createRoot(rootElement);
+    root.render(<App/>);
+}

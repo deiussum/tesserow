@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -12,6 +11,9 @@ import Divider from '@mui/material/Divider';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import mosaic from './Mosaic';
+
+export const NEW_MOSAIC_DEFAULT_WIDTH = 20;
+export const NEW_MOSAIC_DEFAULT_HEIGHT = 20;
 
 interface NewMosaicFormProps {
     open: boolean,
@@ -24,9 +26,9 @@ interface NewMosaicFormProps {
 }
 
 const NewMosaicForm = (props: NewMosaicFormProps) => {
-    const [ inputs, setInputs ] = useState({ 
-        width: props.width, 
-        height: props.height,
+    const [ inputs, setInputs ] = useState({
+        width: props.width ?? NEW_MOSAIC_DEFAULT_WIDTH,
+        height: props.height ?? NEW_MOSAIC_DEFAULT_HEIGHT,
         extraRowsChecked: props.extraRowsChecked,
         extraRows: props.extraRows
     });
@@ -103,10 +105,8 @@ const NewMosaicForm = (props: NewMosaicFormProps) => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <ButtonGroup variant='contained'>
-                        <Button onClick={props.newMosaicCancelled}>Cancel</Button>
-                        <Button type='submit'>Create</Button>
-                    </ButtonGroup>
+                    <Button onClick={props.newMosaicCancelled}>Cancel</Button>
+                    <Button variant='contained' type='submit'>Create</Button>
                 </DialogActions>
             </Box>
         </Dialog>
