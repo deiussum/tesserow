@@ -4,7 +4,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import AppShell from './AppShell';
 
 describe('AppShell menu bar', () => {
-    test('no mosaic open: File shows new/open/import enabled and save/export/close disabled; View is disabled', async () => {
+    test('no mosaic open: File shows new/open/import enabled and save/save as/export/close disabled; View is disabled', async () => {
         render(<AppShell mosaicOpen={false} />);
 
         expect(screen.getByRole('button', { name: 'View' })).toBeDisabled();
@@ -14,7 +14,8 @@ describe('AppShell menu bar', () => {
         expect(await screen.findByRole('menuitem', { name: /New/ })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: /Open/ })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Import Image...' })).not.toHaveAttribute('aria-disabled', 'true');
-        expect(screen.getByRole('menuitem', { name: /Save/ })).toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Save Ctrl+S' })).toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Save As... Ctrl+Shift+S' })).toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Export to PDF...' })).toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Close' })).toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Exit' })).not.toHaveAttribute('aria-disabled', 'true');
@@ -30,7 +31,8 @@ describe('AppShell menu bar', () => {
         expect(await screen.findByRole('menuitem', { name: /New/ })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: /Open/ })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Import Image...' })).not.toHaveAttribute('aria-disabled', 'true');
-        expect(screen.getByRole('menuitem', { name: /Save/ })).not.toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Save Ctrl+S' })).not.toHaveAttribute('aria-disabled', 'true');
+        expect(screen.getByRole('menuitem', { name: 'Save As... Ctrl+Shift+S' })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Export to PDF...' })).not.toHaveAttribute('aria-disabled', 'true');
         expect(screen.getByRole('menuitem', { name: 'Close' })).not.toHaveAttribute('aria-disabled', 'true');
     });
@@ -40,9 +42,21 @@ describe('AppShell menu bar', () => {
         render(<AppShell mosaicOpen={true} saveClicked={saveClicked} />);
 
         fireEvent.click(screen.getByRole('button', { name: 'File' }));
-        fireEvent.click(await screen.findByRole('menuitem', { name: /Save/ }));
+        fireEvent.click(await screen.findByRole('menuitem', { name: 'Save Ctrl+S' }));
 
         expect(saveClicked).toHaveBeenCalledTimes(1);
+    });
+
+    test('clicking Save As invokes its own callback, not Save\'s', async () => {
+        const saveClicked = vi.fn();
+        const saveAsClicked = vi.fn();
+        render(<AppShell mosaicOpen={true} saveClicked={saveClicked} saveAsClicked={saveAsClicked} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'File' }));
+        fireEvent.click(await screen.findByRole('menuitem', { name: 'Save As... Ctrl+Shift+S' }));
+
+        expect(saveAsClicked).toHaveBeenCalledTimes(1);
+        expect(saveClicked).not.toHaveBeenCalled();
     });
 
     test('New is enabled and clickable even while a mosaic is already open', async () => {
@@ -60,7 +74,7 @@ describe('AppShell menu bar', () => {
         render(<AppShell mosaicOpen={false} saveClicked={saveClicked} />);
 
         fireEvent.click(screen.getByRole('button', { name: 'File' }));
-        fireEvent.click(await screen.findByRole('menuitem', { name: /Save/ }));
+        fireEvent.click(await screen.findByRole('menuitem', { name: 'Save Ctrl+S' }));
 
         expect(saveClicked).not.toHaveBeenCalled();
     });
@@ -98,7 +112,7 @@ describe('AppShell menu bar', () => {
         expect(menuBar.lastElementChild).toBe(screen.getByRole('button', { name: 'Help' }));
     });
 
-    test('File items that ask for more input end with an ellipsis; Close and Exit do not', async () => {
+    test('File items that always ask for more input end with an ellipsis; Save, Close, and Exit do not', async () => {
         render(<AppShell mosaicOpen={true} />);
 
         fireEvent.click(screen.getByRole('button', { name: 'File' }));
@@ -106,7 +120,7 @@ describe('AppShell menu bar', () => {
 
         // Shortcut hints (Ctrl+N etc.) are part of the item's text, so read the label span/text node only.
         const labels = screen.getAllByRole('menuitem').map(item => (item.querySelector('span') ?? item).textContent?.trim());
-        expect(labels).toEqual([ 'New...', 'Open...', 'Import Image...', 'Save...', 'Export to PDF...', 'Close', 'Exit' ]);
+        expect(labels).toEqual([ 'New...', 'Open...', 'Import Image...', 'Save', 'Save As...', 'Export to PDF...', 'Close', 'Exit' ]);
     });
 
     test('Help menu opens the About item', async () => {

@@ -18,7 +18,8 @@ vi.mock('@tauri-apps/api/window', () => ({
 
 const dialogsStub: DialogsApi = {
     getFileName: vi.fn(),
-    save: vi.fn().mockResolvedValue({ success: true }),
+    save: vi.fn(async (_data, filePath: string) => ({ success: true as const, filePath })),
+    saveAs: vi.fn().mockResolvedValue({ success: false, error: 'Save cancelled' }),
     open: vi.fn().mockResolvedValue({ success: false, error: 'not used in this test' }),
     import: vi.fn().mockResolvedValue({ success: false, error: 'not used in this test' }),
     resize: vi.fn(),
@@ -252,5 +253,128 @@ describe('File > Export to PDF', () => {
 
         expect(await screen.findByText('Export failed: Standard font "Helvetica" is not registered.')).toBeInTheDocument();
         expect(screen.queryByText('Exporting...')).not.toBeInTheDocument();
+    });
+});
+
+describe('File > Save and Save As', () => {
+    const OPENED_PATH = '/home/user/opened.json';
+
+    beforeEach(() => {
+        mosaic.initialize(6, 6, 0);
+        window.dialogs = {
+            ...dialogsStub,
+            save: vi.fn(async (_data, filePath: string) => ({ success: true as const, filePath })),
+            saveAs: vi.fn().mockResolvedValue({ success: false, error: 'Save cancelled' }),
+            open: vi.fn().mockResolvedValue({ success: true, data: mosaic.data.getSaveData(), filePath: OPENED_PATH }),
+        };
+    });
+
+    async function openEditor() {
+        render(<App />);
+        fireEvent.click(screen.getByRole('button', { name: 'File' }));
+        fireEvent.click(await screen.findByRole('menuitem', { name: /Open/ }));
+        await waitFor(() => expect(screen.getByRole('button', { name: 'View' })).not.toBeDisabled());
+    }
+
+    async function chooseFileItem(name: string) {
+        fireEvent.click(screen.getByRole('button', { name: 'File' }));
+        fireEvent.click(await screen.findByRole('menuitem', { name }));
+    }
+
+    test('Save after Open writes back to the opened file without a dialog', async () => {
+        await openEditor();
+        expect(mosaic.filePath).toBe(OPENED_PATH);
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+
+        await chooseFileItem('Save Ctrl+S');
+
+        await waitFor(() => expect(screen.getByText('Saved')).toBeInTheDocument());
+        expect(window.dialogs.save).toHaveBeenCalledWith(expect.anything(), OPENED_PATH);
+        expect(window.dialogs.saveAs).not.toHaveBeenCalled();
+        expect(mosaic.isDirty).toBe(false);
+    });
+
+    test('Save on a chart with no associated file prompts once, then later Saves reuse the chosen file', async () => {
+        await openEditor();
+        // Stand in for a new/imported chart, which has no associated file.
+        mosaic.filePath = null;
+        vi.mocked(window.dialogs.saveAs).mockResolvedValue({ success: true, filePath: '/home/user/new.json' });
+
+        await chooseFileItem('Save Ctrl+S');
+        await waitFor(() => expect(mosaic.filePath).toBe('/home/user/new.json'));
+        expect(window.dialogs.saveAs).toHaveBeenCalledTimes(1);
+
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+        await chooseFileItem('Save Ctrl+S');
+
+        await waitFor(() => expect(window.dialogs.save).toHaveBeenCalledWith(expect.anything(), '/home/user/new.json'));
+        expect(window.dialogs.saveAs).toHaveBeenCalledTimes(1);
+    });
+
+    test('Save As prompts with the current file as the default and re-associates the chart', async () => {
+        await openEditor();
+        vi.mocked(window.dialogs.saveAs).mockResolvedValue({ success: true, filePath: '/home/user/copy.json' });
+
+        await chooseFileItem('Save As... Ctrl+Shift+S');
+
+        await waitFor(() => expect(mosaic.filePath).toBe('/home/user/copy.json'));
+        expect(window.dialogs.saveAs).toHaveBeenCalledWith(expect.anything(), OPENED_PATH);
+        expect(window.dialogs.save).not.toHaveBeenCalled();
+    });
+
+    test('cancelling Save As keeps the existing associated file', async () => {
+        await openEditor();
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+
+        await chooseFileItem('Save As... Ctrl+Shift+S');
+
+        await waitFor(() => expect(screen.getByText('Saved')).toBeInTheDocument());
+        expect(mosaic.filePath).toBe(OPENED_PATH);
+        expect(mosaic.isDirty).toBe(true);
+    });
+
+    test('a failed write shows "Save failed" and leaves the chart dirty', async () => {
+        await openEditor();
+        vi.mocked(window.dialogs.save).mockRejectedValue(new Error('Permission denied'));
+        mosaic.data.getCellByChartRowAndCol(3, 3).toggleColor();
+
+        await chooseFileItem('Save Ctrl+S');
+
+        expect(await screen.findByText('Save failed: Permission denied')).toBeInTheDocument();
+        expect(screen.queryByText('Saved')).not.toBeInTheDocument();
+        expect(mosaic.isDirty).toBe(true);
+        expect(mosaic.filePath).toBe(OPENED_PATH);
+    });
+
+    test('Close clears the associated file', async () => {
+        await openEditor();
+
+        await chooseFileItem('Close');
+
+        await waitFor(() => expect(screen.getByRole('button', { name: 'View' })).toBeDisabled());
+        expect(mosaic.filePath).toBeNull();
+    });
+
+    test('Ctrl+Shift+S runs Save As and not Save; Ctrl+S runs Save', async () => {
+        await openEditor();
+
+        fireEvent.keyDown(window, { key: 'S', ctrlKey: true, shiftKey: true });
+        await waitFor(() => expect(window.dialogs.saveAs).toHaveBeenCalledTimes(1));
+        expect(window.dialogs.save).not.toHaveBeenCalled();
+
+        fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+        await waitFor(() => expect(window.dialogs.save).toHaveBeenCalledWith(expect.anything(), OPENED_PATH));
+        expect(window.dialogs.saveAs).toHaveBeenCalledTimes(1);
+    });
+
+    test('Save and Save As accelerators do nothing on the home screen', async () => {
+        render(<App />);
+
+        fireEvent.keyDown(window, { key: 's', ctrlKey: true });
+        fireEvent.keyDown(window, { key: 'S', ctrlKey: true, shiftKey: true });
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(window.dialogs.save).not.toHaveBeenCalled();
+        expect(window.dialogs.saveAs).not.toHaveBeenCalled();
     });
 });

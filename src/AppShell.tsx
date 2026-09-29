@@ -25,6 +25,7 @@ interface AppShellProps {
     toggleWrittenPatternClicked?: () => void;
     exportClicked?: () => void;
     saveClicked?: () => void;
+    saveAsClicked?: () => void;
     closeClicked?: () => void;
     exitClicked?: () => void;
     zoomInClicked?: () => void;
@@ -123,8 +124,12 @@ const AppShell = (props: AppShellProps) => {
                     </MenuItem>
                     <Divider />
                     <MenuItem sx={shortcutTextSx} disabled={!props.mosaicOpen} onClick={() => fileItemClicked(props.saveClicked)}>
-                        <span>Save...</span>
+                        <span>Save</span>
                         <Typography variant='body2' color='text.secondary'>Ctrl+S</Typography>
+                    </MenuItem>
+                    <MenuItem sx={shortcutTextSx} disabled={!props.mosaicOpen} onClick={() => fileItemClicked(props.saveAsClicked)}>
+                        <span>Save As...</span>
+                        <Typography variant='body2' color='text.secondary'>Ctrl+Shift+S</Typography>
                     </MenuItem>
                     <MenuItem disabled={!props.mosaicOpen} onClick={() => fileItemClicked(props.exportClicked)}>
                         Export to PDF...
